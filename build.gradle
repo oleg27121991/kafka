@@ -1,0 +1,85 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.3'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'kafkareader'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+ext {
+	set('flywayVersion', "9.22.3")
+}
+
+dependencies {
+	// Spring Boot базовые зависимости
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	// Spring Kafka
+	implementation 'org.springframework.kafka:spring-kafka'
+
+	// Spring Data JPA
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+	// Flyway для миграций (только core - драйвер PostgreSQL встроен)
+	implementation "org.flywaydb:flyway-core:${flywayVersion}"
+
+	// PostgreSQL
+	implementation 'org.postgresql:postgresql'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Тесты
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	testImplementation 'com.h2database:h2'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+	// Дополнительные зависимости
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	testLogging {
+		events = ["passed", "skipped", "failed"]
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs += ['-Xlint:deprecation', '-Xlint:unchecked']
+	options.encoding = 'UTF-8'
+}
+
+bootJar {
+	enabled = true
+	archiveClassifier = ''
+}
+
+jar {
+	enabled = false
+}
+
+tasks.withType(org.springframework.boot.gradle.tasks.bundling.BootJar).configureEach {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

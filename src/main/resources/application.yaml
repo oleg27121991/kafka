@@ -1,0 +1,77 @@
+spring:
+  application:
+    name: kafkareader
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://host.docker.internal:5433/kafkareader}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    hikari:
+      connection-timeout: 20000
+      minimum-idle: 10
+      maximum-pool-size: 30
+      idle-timeout: 10000
+      max-lifetime: 1800000
+      auto-commit: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    schema: kafkareader
+    locations: classpath:db/migration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
+      show-sql: false
+      open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+    context-path: /
+  web:
+    resources:
+      static-locations: classpath:/static/
+      add-mappings: true
+    mvc:
+      static-path-pattern: /**
+      view-controller:
+        path: /
+        view-name: forward:/index.html
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: ${spring.application.name}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    properties:
+      security:
+        protocol: ${KAFKA_SECURITY_PROTOCOL}
+
+# Настройки Kafka Writer
+kafka:
+  writer:
+    threads: 4
+    batch-size: 10000
+
+# Отладочный вывод
+logging:
+  level:
+    org.springframework.kafka: DEBUG
+    kafkareader: INFO
+    org.springframework.boot.context.config: TRACE
+    org.hibernate.SQL: OFF
+    org.hibernate.type.descriptor.sql: OFF
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
+
+server:
+  port: 8080

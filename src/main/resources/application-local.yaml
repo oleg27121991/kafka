@@ -1,0 +1,89 @@
+spring:
+  application:
+    name: kafkareader
+  datasource:
+    url: jdbc:postgresql://localhost:5433/kafkareader
+    username: postgres
+    password: postgres
+    hikari:
+      connection-timeout: 20000
+      minimum-idle: 10
+      maximum-pool-size: 30
+      idle-timeout: 10000
+      max-lifetime: 1800000
+      auto-commit: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    schema: kafkareader
+    locations: classpath:db/migration
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
+      show-sql: false
+      open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+    context-path: /
+  web:
+    resources:
+      static-locations: classpath:/static/
+      add-mappings: true
+    mvc:
+      static-path-pattern: /**
+      view-controller:
+        path: /
+        view-name: forward:/index.html
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        batch.size: 2097152  # 2MB
+        buffer.memory: 134217728  # 128MB
+        compression.type: lz4
+        max.request.size: 2097152  # 2MB
+        acks: 0  # Отключаем подтверждения для максимальной скорости
+        retries: 0  # Отключаем повторные попытки
+        linger.ms: 1  # Минимальная задержка
+        max.in.flight.requests.per.connection: 10
+        enable.idempotence: false
+        max.block.ms: 1000
+        request.timeout.ms: 1000
+    consumer:
+      group-id: ${spring.application.name}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    properties:
+      security:
+        protocol: PLAINTEXT
+
+# Настройки Kafka Writer
+kafka:
+  writer:
+    threads: 4  # Количество независимых потоков для записи в Kafka
+    batch-size: 10000  # Начальный размер батча для каждого потока
+
+# Отладочный вывод
+logging:
+  level:
+    org.springframework.kafka: OFF
+    kafkareader: INFO
+    org.springframework.boot.context.config: OFF
+    org.hibernate.SQL: OFF
+    org.hibernate.type.descriptor.sql: OFF
+    org.hibernate.type.descriptor.sql.BasicBinder: OFF
+
+server:
+  port: 5252 

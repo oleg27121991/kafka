@@ -1,0 +1,1248 @@
+/Users/olegveremei/Library/Java/JavaVirtualMachines/corretto-21.0.4/Contents/Home/bin/java -XX:TieredStopAtLevel=1 -Dspring.profiles.active=local -Dspring.output.ansi.enabled=always -Dcom.sun.management.jmxremote -Dspring.jmx.enabled=true -Dspring.liveBeansView.mbeanDomain -Dspring.application.admin.enabled=true -Dmanagement.endpoints.jmx.exposure.include=* -javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=60532:/Applications/IntelliJ IDEA.app/Contents/bin -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -classpath /Users/olegveremei/Desktop/kafkareader/build/classes/java/main:/Users/olegveremei/Desktop/kafkareader/build/resources/main:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.30/f195ee86e6c896ea47a1d39defbe20eb59cd149d/lombok-1.18.30.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-web/3.2.3/bf2b775d4f4e6349129c64de30939a5493779706/spring-boot-starter-web-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-thymeleaf/3.2.3/dbb434ce42b99f0685963d0a5824cd8f3835a1ac/spring-boot-starter-thymeleaf-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.kafka/spring-kafka/3.1.2/a7a304f5debd5673d4176c760efe4e248b4e548d/spring-kafka-3.1.2.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-data-jpa/3.2.3/1fd0770b23c57627e5a37726fb4060f5bfa4da6f/spring-boot-starter-data-jpa-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.flywaydb/flyway-core/9.22.3/76519923a547892f0108b99d1e7b06dcb4727ecd/flyway-core-9.22.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.postgresql/postgresql/42.6.1/aded708fdd722a277ebce49c29c3c6fa0703420/postgresql-42.6.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.15.4/560309fc381f77d4d15c4a4cdaa0db5025c4fd13/jackson-databind-2.15.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-validation/3.2.3/6bb79fe1a0760b5cec37bd85e31bd4cc987c8185/spring-boot-starter-validation-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-json/3.2.3/c71ec683425f09b7a213358d3b22959d929d1108/spring-boot-starter-json-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter/3.2.3/15f3e03b0fd9570f90bdce9651610cc152534cf4/spring-boot-starter-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-tomcat/3.2.3/ac392404d41766194b8fce6834c71879f9e8f479/spring-boot-starter-tomcat-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-webmvc/6.1.4/e7aad7c53e05c8772209e915029e121262a7bc33/spring-webmvc-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-web/6.1.4/b237532e03330a7cf8f66dc147e62bbbe44c702f/spring-web-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.thymeleaf/thymeleaf-spring6/3.1.2.RELEASE/6030c7b4e260c41336f378e53da6e8531263f24b/thymeleaf-spring6-3.1.2.RELEASE.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-context/6.1.4/765316bef55e41e4523f9b2780b8721ce5dd0fe2/spring-context-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-messaging/6.1.4/6de5be83e0772acb48221b895f1d2324d1db500f/spring-messaging-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-tx/6.1.4/7179b3c7febc0514556ea4e3f1613cacb358078d/spring-tx-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.retry/spring-retry/2.0.5/6aa0cd18f611ee83dc1d8e5052485e9669088253/spring-retry-2.0.5.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.apache.kafka/kafka-clients/3.6.1/f286782832fee4fca84c2f4158b9258f22fa0b85/kafka-clients-3.6.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/io.micrometer/micrometer-observation/1.12.3/105f768c211564fcebe4d79419bda4ebef0d0ac7/micrometer-observation-1.12.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-aop/3.2.3/db8d799efd6cacd3bd134d471c3f983cbc1a137/spring-boot-starter-aop-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-jdbc/3.2.3/4c3632af95417c28c45342b08353ccaecaacbf3/spring-boot-starter-jdbc-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.data/spring-data-jpa/3.2.3/ae734906f5fb1e1892da7ab48acb6d0e0d407673/spring-data-jpa-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.hibernate.orm/hibernate-core/6.4.4.Final/5c9decb3c5a70bf7801d41fc32633416c26be069/hibernate-core-6.4.4.Final.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-aspects/6.1.4/2b1b5c0f9f639d0317b9f7c20c07f90b49fee6fb/spring-aspects-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.dataformat/jackson-dataformat-toml/2.15.4/4dde0126d9484603cd1b98e9654827697e16fce/jackson-dataformat-toml-2.15.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.10.1/b3add478d4382b78ea20b1671390a858002feb6c/gson-2.10.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.15.4/5223ea5a9bf52cdc9c5e537a0e52f2432eaf208b/jackson-annotations-2.15.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.15.4/aebe84b45360debad94f692a4074c6aceb535fa0/jackson-core-2.15.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-el/10.1.19/c61a582c391aca130884a5421deedfe1a96c7415/tomcat-embed-el-10.1.19.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.hibernate.validator/hibernate-validator/8.0.1.Final/e49e116b3d3928060599b176b3538bb848718e95/hibernate-validator-8.0.1.Final.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.15.4/7de629770a4559db57128d35ccae7d2fddd35db3/jackson-datatype-jsr310-2.15.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.15.4/694777f182334a21bf1aeab1b04cc4398c801f3f/jackson-datatype-jdk8-2.15.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.module/jackson-module-parameter-names/2.15.4/e654497a08359db2521b69b5f710e00836915d8c/jackson-module-parameter-names-2.15.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-autoconfigure/3.2.3/59db74eb4196885bb5a149417ab1ab51dc9b6952/spring-boot-autoconfigure-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot/3.2.3/b4aa6e3fdc4078fee4a4b9d702d9cc64e3fad1d4/spring-boot-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-logging/3.2.3/c186015229d7f5cbd30ea99bf903a8cede6d849f/spring-boot-starter-logging-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/jakarta.annotation/jakarta.annotation-api/2.1.1/48b9bda22b091b1f48b13af03fe36db3be6e1ae3/jakarta.annotation-api-2.1.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-core/6.1.4/3b4dde8f55c3d5d4e948de64b866d7bb27e5a8d4/spring-core-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.yaml/snakeyaml/2.2/3af797a25458550a16bf89acc8e4ab2b7f2bfce0/snakeyaml-2.2.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-websocket/10.1.19/adf4710fac2471236f8a466ca678cdf7e6a8257c/tomcat-embed-websocket-10.1.19.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-core/10.1.19/3dbbca8acbd4dd6a137c3d6f934a2931512b42ce/tomcat-embed-core-10.1.19.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-aop/6.1.4/26ae2c9e7f69b0235a2faca1c58416c51eaebef6/spring-aop-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-beans/6.1.4/e311cc9937d522a1051622580b4a2c250fc74164/spring-beans-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-expression/6.1.4/a1f2e3af83c7222b7f95f68a8e0666fdcceb35e1/spring-expression-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.thymeleaf/thymeleaf/3.1.2.RELEASE/273997509a4c7aef86cee0521750140c587d9be2/thymeleaf-3.1.2.RELEASE.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.12/48f109a2a6d8f446c794f3e3fa0d86df0cdfa312/slf4j-api-2.0.12.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/io.micrometer/micrometer-commons/1.12.3/83add2dda5cdc811fefb83e858c7412a176fe5b1/micrometer-commons-1.12.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.aspectj/aspectjweaver/1.9.21/beaabaea95c7f3330f415c72ee0ffe79b51d172f/aspectjweaver-1.9.21.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-jdbc/6.1.4/4e9ac0b228f11a90f6bc647276fdffa7ac0f12fe/spring-jdbc-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.zaxxer/HikariCP/5.0.1/a74c7f0a37046846e88d54f7cb6ea6d565c65f9c/HikariCP-5.0.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-orm/6.1.4/d8119336a38cba3e794bfec7761e2690056affe0/spring-orm-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework.data/spring-data-commons/3.2.3/9b09afa13803c321e4b72ef5448e0d93d9f8ca18/spring-data-commons-3.2.3.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.antlr/antlr4-runtime/4.13.0/5a02e48521624faaf5ff4d99afc88b01686af655/antlr4-runtime-4.13.0.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/jakarta.persistence/jakarta.persistence-api/3.1.0/66901fa1c373c6aff65c13791cc11da72060a8d6/jakarta.persistence-api-3.1.0.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/jakarta.transaction/jakarta.transaction-api/2.0.1/51a520e3fae406abb84e2e1148e6746ce3f80a1a/jakarta.transaction-api-2.0.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/jakarta.validation/jakarta.validation-api/3.0.2/92b6631659ba35ca09e44874d3eb936edfeee532/jakarta.validation-api-3.0.2.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.jboss.logging/jboss-logging/3.5.3.Final/c88fc1d8a96d4c3491f55d4317458ccad53ca663/jboss-logging-3.5.3.Final.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.fasterxml/classmate/1.6.0/91affab6f84a2182fce5dd72a8d01bc14346dddd/classmate-1.6.0.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-classic/1.4.14/d98bc162275134cdf1518774da4a2a17ef6fb94d/logback-classic-1.4.14.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-to-slf4j/2.21.1/d77b2ba81711ed596cd797cc2b5b5bd7409d841c/log4j-to-slf4j-2.21.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.slf4j/jul-to-slf4j/2.0.12/eb5f48f782b41cc881b0bf1fb4d88ae2ff6d5b93/jul-to-slf4j-2.0.12.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.springframework/spring-jcl/6.1.4/a244bd674a5431dfdce68d28cdf857104e6fff67/spring-jcl-6.1.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.attoparser/attoparser/2.0.7.RELEASE/e5d0e988d9124139d645bb5872b24dfa23e283cc/attoparser-2.0.7.RELEASE.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.unbescape/unbescape/1.1.6.RELEASE/7b90360afb2b860e09e8347112800d12c12b2a13/unbescape-1.1.6.RELEASE.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-core/1.4.14/4d3c2248219ac0effeb380ed4c5280a80bf395e8/logback-core-1.4.14.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.21.1/74c65e87b9ce1694a01524e192d7be989ba70486/log4j-api-2.21.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.2/25ea2e8b0c338a877313bd4672d3fe056ea78f0d/jsr305-3.0.2.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-qual/3.31.0/eeefd4af42e2f4221d145c1791582f91868f99ab/checker-qual-3.31.0.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.github.luben/zstd-jni/1.5.5-1/fda1d6278299af27484e1cc3c79a060e41b7ef7e/zstd-jni-1.5.5-1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.lz4/lz4-java/1.8.0/4b986a99445e49ea5fbf5d149c4b63f6ed6c6780/lz4-java-1.8.0.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.xerial.snappy/snappy-java/1.1.10.5/ac605269f3598506196e469f1fb0d7ed5c55059e/snappy-java-1.1.10.5.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.hibernate.common/hibernate-commons-annotations/6.0.6.Final/77a5f94b56d49508e0ee334751db5b78e5ccd50c/hibernate-commons-annotations-6.0.6.Final.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/io.smallrye/jandex/3.1.2/a6c1c89925c7df06242b03dddb353116ceb9584c/jandex-3.1.2.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/net.bytebuddy/byte-buddy/1.14.12/6e37f743dc15a8d7a4feb3eb0025cbc612d5b9e1/byte-buddy-1.14.12.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb/jaxb-runtime/4.0.4/7180c50ef8bd127bb1dd645458b906cffcf6c2b5/jaxb-runtime-4.0.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/jakarta.xml.bind/jakarta.xml.bind-api/4.0.1/ca2330866cbc624c7e5ce982e121db1125d23e15/jakarta.xml.bind-api-4.0.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/jakarta.inject/jakarta.inject-api/2.0.1/4c28afe1991a941d7702fe1362c365f0a8641d1e/jakarta.inject-api-2.0.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb/jaxb-core/4.0.4/2d5aadd02af86f1e9d8c6f7e8501673f915d4e25/jaxb-core-4.0.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/jakarta.activation/jakarta.activation-api/2.1.2/640c0d5aff45dbff1e1a1bc09673ff3a02b1ba12/jakarta.activation-api-2.1.2.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.eclipse.angus/angus-activation/2.0.1/eaafaf4eb71b400e4136fc3a286f50e34a68ecb7/angus-activation-2.0.1.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb/txw2/4.0.4/cfd2bcf08782673ac370694fdf2cf76dbaa607ef/txw2-4.0.4.jar:/Users/olegveremei/.gradle/caches/modules-2/files-2.1/com.sun.istack/istack-commons-runtime/4.1.2/18ec117c85f3ba0ac65409136afa8e42bc74e739/istack-commons-runtime-4.1.2.jar kafkareader.KafkareaderApplication
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.3)
+
+2025-05-29T21:46:58.055+03:00  INFO 48749 --- [kafkareader] [           main] kafkareader.KafkareaderApplication       : Starting KafkareaderApplication using Java 21.0.4 with PID 48749 (/Users/olegveremei/Desktop/kafkareader/build/classes/java/main started by olegveremei in /Users/olegveremei/Desktop/kafkareader)
+2025-05-29T21:46:58.056+03:00  INFO 48749 --- [kafkareader] [           main] kafkareader.KafkareaderApplication       : The following 1 profile is active: "local"
+2025-05-29T21:46:58.295+03:00  INFO 48749 --- [kafkareader] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-29T21:46:58.315+03:00  INFO 48749 --- [kafkareader] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 16 ms. Found 1 JPA repository interface.
+2025-05-29T21:46:58.542+03:00  INFO 48749 --- [kafkareader] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 5252 (http)
+2025-05-29T21:46:58.547+03:00  INFO 48749 --- [kafkareader] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-29T21:46:58.548+03:00  INFO 48749 --- [kafkareader] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-05-29T21:46:58.569+03:00  INFO 48749 --- [kafkareader] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-05-29T21:46:58.569+03:00  INFO 48749 --- [kafkareader] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 496 ms
+2025-05-29T21:46:58.618+03:00  INFO 48749 --- [kafkareader] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-29T21:46:58.688+03:00  INFO 48749 --- [kafkareader] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@63f40ca0
+2025-05-29T21:46:58.689+03:00  INFO 48749 --- [kafkareader] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-29T21:46:58.717+03:00  INFO 48749 --- [kafkareader] [           main] o.f.c.internal.license.VersionPrinter    : Flyway Community Edition 9.22.3 by Redgate
+2025-05-29T21:46:58.717+03:00  INFO 48749 --- [kafkareader] [           main] o.f.c.internal.license.VersionPrinter    : See release notes here: https://rd.gt/416ObMi
+2025-05-29T21:46:58.717+03:00  INFO 48749 --- [kafkareader] [           main] o.f.c.internal.license.VersionPrinter    :
+2025-05-29T21:46:58.722+03:00  INFO 48749 --- [kafkareader] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:5433/kafkareader (PostgreSQL 15.13)
+2025-05-29T21:46:58.740+03:00  INFO 48749 --- [kafkareader] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+2025-05-29T21:46:58.742+03:00  INFO 48749 --- [kafkareader] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 3 migrations (execution time 00:00.007s)
+2025-05-29T21:46:58.753+03:00  INFO 48749 --- [kafkareader] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+2025-05-29T21:46:58.800+03:00  INFO 48749 --- [kafkareader] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+2025-05-29T21:46:58.804+03:00  INFO 48749 --- [kafkareader] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - init"
+2025-05-29T21:46:58.824+03:00  INFO 48749 --- [kafkareader] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "2 - add metrics fields"
+2025-05-29T21:46:58.834+03:00  INFO 48749 --- [kafkareader] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "3 - update kafka config table"
+2025-05-29T21:46:58.848+03:00  INFO 48749 --- [kafkareader] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 3 migrations to schema "public", now at version v3 (execution time 00:00.025s)
+2025-05-29T21:46:58.882+03:00  INFO 48749 --- [kafkareader] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-29T21:46:58.904+03:00  INFO 48749 --- [kafkareader] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2025-05-29T21:46:58.917+03:00  INFO 48749 --- [kafkareader] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-05-29T21:46:59.006+03:00  INFO 48749 --- [kafkareader] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-29T21:46:59.028+03:00  WARN 48749 --- [kafkareader] [           main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-05-29T21:46:59.352+03:00  INFO 48749 --- [kafkareader] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-29T21:46:59.377+03:00  INFO 48749 --- [kafkareader] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-29T21:46:59.501+03:00  INFO 48749 --- [kafkareader] [           main] kafkareader.service.KafkaConfigService   : KafkaConfigService инициализирован
+2025-05-29T21:46:59.503+03:00  INFO 48749 --- [kafkareader] [           main] kafkareader.service.KafkaConfigService   : Инициализация KafkaConfigService...
+2025-05-29T21:46:59.572+03:00  WARN 48749 --- [kafkareader] [           main] kafkareader.service.KafkaConfigService   : Активная конфигурация не найдена
+2025-05-29T21:46:59.583+03:00  INFO 48749 --- [kafkareader] [           main] k.service.ContinuousLogWriter            : Инициализация ContinuousLogWriter...
+2025-05-29T21:46:59.586+03:00  INFO 48749 --- [kafkareader] [           main] kafkareader.service.KafkaConfigService   : Получены bootstrap servers: null
+2025-05-29T21:46:59.587+03:00  WARN 48749 --- [kafkareader] [           main] kafkareader.config.KafkaConfig           : Bootstrap servers not configured yet
+2025-05-29T21:46:59.587+03:00  INFO 48749 --- [kafkareader] [           main] kafkareader.config.KafkaConfig           : Создание producer configs...
+2025-05-29T21:46:59.588+03:00  INFO 48749 --- [kafkareader] [           main] kafkareader.service.KafkaConfigService   : Получены bootstrap servers: null
+2025-05-29T21:46:59.588+03:00  WARN 48749 --- [kafkareader] [           main] kafkareader.config.KafkaConfig           : Bootstrap servers не настроены
+2025-05-29T21:46:59.589+03:00  INFO 48749 --- [kafkareader] [           main] kafkareader.service.KafkaConfigService   : Получены bootstrap servers: null
+2025-05-29T21:46:59.589+03:00  WARN 48749 --- [kafkareader] [           main] kafkareader.config.KafkaConfig           : Bootstrap servers not configured yet
+2025-05-29T21:46:59.589+03:00  WARN 48749 --- [kafkareader] [           main] kafkareader.config.KafkaConfig           : Consumer config is empty, returning null factory
+2025-05-29T21:46:59.610+03:00  WARN 48749 --- [kafkareader] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-29T21:46:59.619+03:00  INFO 48749 --- [kafkareader] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2025-05-29T21:46:59.721+03:00  WARN 48749 --- [kafkareader] [           main] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2025-05-29T21:46:59.781+03:00  INFO 48749 --- [kafkareader] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 5252 (http) with context path ''
+2025-05-29T21:46:59.785+03:00  INFO 48749 --- [kafkareader] [           main] kafkareader.KafkareaderApplication       : Started KafkareaderApplication in 1.873 seconds (process running for 2.102)
+2025-05-29T21:47:03.241+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-29T21:47:03.241+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-05-29T21:47:03.242+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-05-29T21:47:03.460+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Получены bootstrap servers: null
+2025-05-29T21:47:03.462+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Получен topic: null
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : Проверка подключения к Kafka с настройками:
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : Проверка подключения к Kafka с настройками:
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : security.protocol = PLAINTEXT
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : security.protocol = PLAINTEXT
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : retries = 3
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : retries = 3
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : client.dns.lookup = use_all_dns_ips
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : client.dns.lookup = use_all_dns_ips
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : reconnect.backoff.max.ms = 5000
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : reconnect.backoff.max.ms = 5000
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : request.timeout.ms = 30000
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : request.timeout.ms = 30000
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : reconnect.backoff.ms = 1000
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : reconnect.backoff.ms = 1000
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : bootstrap.servers = 192.168.45.128:9092
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : bootstrap.servers = 192.168.45.128:9092
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : connections.max.idle.ms = 540000
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : connections.max.idle.ms = 540000
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : retry.backoff.ms = 1000
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : retry.backoff.ms = 1000
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : client.id = kafkareader-connection-check-1748544436960-56
+2025-05-29T21:47:16.962+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : client.id = kafkareader-connection-check-1748544436960-57
+2025-05-29T21:47:16.975+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-connection-check-1748544436960-56
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 5000
+	reconnect.backoff.ms = 1000
+	request.timeout.ms = 30000
+	retries = 3
+	retry.backoff.ms = 1000
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:16.975+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-connection-check-1748544436960-57
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 5000
+	reconnect.backoff.ms = 1000
+	request.timeout.ms = 30000
+	retries = 3
+	retry.backoff.ms = 1000
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:17.010+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:17.010+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:17.010+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544437009
+2025-05-29T21:47:17.011+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:17.011+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:17.011+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544437009
+2025-05-29T21:47:17.450+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : Новые настройки сохранены в БД: bootstrapServers=192.168.45.128:9092, topic=
+2025-05-29T21:47:17.450+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : Новые настройки сохранены в БД: bootstrapServers=192.168.45.128:9092, topic=
+2025-05-29T21:47:17.451+03:00  INFO 48749 --- [kafkareader] [748544436960-57] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-connection-check-1748544436960-57 unregistered
+2025-05-29T21:47:17.451+03:00  INFO 48749 --- [kafkareader] [748544436960-56] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-connection-check-1748544436960-56 unregistered
+2025-05-29T21:47:17.453+03:00  INFO 48749 --- [kafkareader] [748544436960-57] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:17.453+03:00  INFO 48749 --- [kafkareader] [748544436960-56] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:17.454+03:00  INFO 48749 --- [kafkareader] [748544436960-57] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:17.454+03:00  INFO 48749 --- [kafkareader] [748544436960-56] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:17.454+03:00  INFO 48749 --- [kafkareader] [748544436960-57] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:17.454+03:00  INFO 48749 --- [kafkareader] [748544436960-56] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:19.323+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Обновление конфигурации Kafka
+2025-05-29T21:47:19.323+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Параметры подключения: bootstrapServers=192.168.45.128:9092, topic=null, username=, password=***
+2025-05-29T21:47:19.340+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Найдено 2 активных конфигураций
+2025-05-29T21:47:19.353+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Деактивирована конфигурация: id=1, bootstrapServers=192.168.45.128:9092
+2025-05-29T21:47:19.356+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Деактивирована конфигурация: id=2, bootstrapServers=192.168.45.128:9092
+2025-05-29T21:47:19.359+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Создана новая конфигурация: id=3, bootstrapServers=192.168.45.128:9092, topic=null, active=true
+2025-05-29T21:47:19.359+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Конфигурация Kafka для проверки подключения:
+2025-05-29T21:47:19.359+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : metadata.max.age.ms = 300000
+2025-05-29T21:47:19.359+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : socket.connection.setup.timeout.max.ms = 60000
+2025-05-29T21:47:19.359+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : reconnect.backoff.max.ms = 5000
+2025-05-29T21:47:19.359+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : socket.connection.setup.timeout.ms = 30000
+2025-05-29T21:47:19.359+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : request.timeout.ms = 120000
+2025-05-29T21:47:19.359+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : reconnect.backoff.ms = 1000
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : bootstrap.servers = 192.168.45.128:9092
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : retry.backoff.ms = 1000
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : socket.timeout.ms = 60000
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : security.protocol = PLAINTEXT
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : retries = 5
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : client.dns.lookup = use_all_dns_ips
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : max.block.ms = 120000
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : connections.max.idle.ms = 540000
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : client.id = kafkareader-config-check-1748544439359-51
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Создаем AdminClient с bootstrap.servers=192.168.45.128:9092
+2025-05-29T21:47:19.360+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-config-check-1748544439359-51
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 5000
+	reconnect.backoff.ms = 1000
+	request.timeout.ms = 120000
+	retries = 5
+	retry.backoff.ms = 1000
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 60000
+	socket.connection.setup.timeout.ms = 30000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:19.361+03:00  WARN 48749 --- [kafkareader] [nio-5252-exec-4] o.a.k.clients.admin.KafkaAdminClient     : [AdminClient clientId=kafkareader-config-check-1748544439359-51] Overriding the default value for default.api.timeout.ms (0) with the explicitly configured request timeout 120000
+2025-05-29T21:47:19.362+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] o.a.k.clients.admin.AdminClientConfig    : These configurations '[socket.timeout.ms, max.block.ms]' were supplied but are not used yet.
+2025-05-29T21:47:19.362+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:19.362+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:19.362+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544439362
+2025-05-29T21:47:19.362+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : AdminClient создан, проверяем подключение...
+2025-05-29T21:47:19.362+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Запрашиваем список топиков...
+2025-05-29T21:47:19.675+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Подключение к Kafka успешно установлено. Доступные топики: [test, logs]
+2025-05-29T21:47:19.676+03:00  INFO 48749 --- [kafkareader] [748544439359-51] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-config-check-1748544439359-51 unregistered
+2025-05-29T21:47:19.677+03:00  INFO 48749 --- [kafkareader] [748544439359-51] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:19.677+03:00  INFO 48749 --- [kafkareader] [748544439359-51] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:19.677+03:00  INFO 48749 --- [kafkareader] [748544439359-51] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:19.677+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-admin-1748544439677-51
+	connections.max.idle.ms = 300000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 2147483647
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:19.678+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:19.678+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:19.678+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544439678
+2025-05-29T21:47:19.715+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Spring бины успешно обновлены
+2025-05-29T21:47:19.715+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Обновление конфигурации Kafka
+2025-05-29T21:47:19.715+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Параметры подключения: bootstrapServers=192.168.45.128:9092, topic=null, username=, password=***
+2025-05-29T21:47:19.715+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Закрытие AdminClient...
+2025-05-29T21:47:19.715+03:00  INFO 48749 --- [kafkareader] [748544439677-51] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-admin-1748544439677-51 unregistered
+2025-05-29T21:47:19.715+03:00  INFO 48749 --- [kafkareader] [748544439677-51] o.a.k.c.a.i.AdminMetadataManager         : [AdminClient clientId=kafkareader-admin-1748544439677-51] Metadata update failed
+
+org.apache.kafka.common.errors.TimeoutException: Timed out waiting to send the call. Call: fetchMetadata
+
+2025-05-29T21:47:19.716+03:00  INFO 48749 --- [kafkareader] [748544439677-51] o.a.k.clients.admin.KafkaAdminClient     : [AdminClient clientId=kafkareader-admin-1748544439677-51] Timed out 1 remaining operation(s) during close.
+2025-05-29T21:47:19.717+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Получены bootstrap servers: 192.168.45.128:9092
+2025-05-29T21:47:19.717+03:00  INFO 48749 --- [kafkareader] [748544439677-51] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:19.717+03:00  INFO 48749 --- [kafkareader] [748544439677-51] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:19.717+03:00  INFO 48749 --- [kafkareader] [748544439677-51] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:19.717+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : AdminClient успешно закрыт
+2025-05-29T21:47:19.717+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-4] kafkareader.service.KafkaConfigService   : Получен topic: null
+2025-05-29T21:47:20.603+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-5] kafkareader.service.KafkaConfigService   : Получение списка топиков с bootstrap.servers=192.168.45.128:9092
+2025-05-29T21:47:20.604+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-5] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-topic-lister-1748544440603
+	connections.max.idle.ms = 300000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 2147483647
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:20.606+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-5] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:20.606+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-5] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:20.606+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-5] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544440606
+2025-05-29T21:47:20.729+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Найдено 1 активных конфигураций
+2025-05-29T21:47:20.737+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Деактивирована конфигурация: id=3, bootstrapServers=192.168.45.128:9092
+2025-05-29T21:47:20.742+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Создана новая конфигурация: id=4, bootstrapServers=192.168.45.128:9092, topic=null, active=true
+2025-05-29T21:47:20.742+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Конфигурация Kafka для проверки подключения:
+2025-05-29T21:47:20.742+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : metadata.max.age.ms = 300000
+2025-05-29T21:47:20.742+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : socket.connection.setup.timeout.max.ms = 60000
+2025-05-29T21:47:20.742+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : reconnect.backoff.max.ms = 5000
+2025-05-29T21:47:20.742+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : socket.connection.setup.timeout.ms = 30000
+2025-05-29T21:47:20.742+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : request.timeout.ms = 120000
+2025-05-29T21:47:20.742+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : reconnect.backoff.ms = 1000
+2025-05-29T21:47:20.742+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : bootstrap.servers = 192.168.45.128:9092
+2025-05-29T21:47:20.743+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : retry.backoff.ms = 1000
+2025-05-29T21:47:20.743+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : socket.timeout.ms = 60000
+2025-05-29T21:47:20.743+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : security.protocol = PLAINTEXT
+2025-05-29T21:47:20.743+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : retries = 5
+2025-05-29T21:47:20.743+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : client.dns.lookup = use_all_dns_ips
+2025-05-29T21:47:20.743+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : max.block.ms = 120000
+2025-05-29T21:47:20.743+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : connections.max.idle.ms = 540000
+2025-05-29T21:47:20.743+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : client.id = kafkareader-config-check-1748544440742-50
+2025-05-29T21:47:20.743+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Создаем AdminClient с bootstrap.servers=192.168.45.128:9092
+2025-05-29T21:47:20.743+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-config-check-1748544440742-50
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 5000
+	reconnect.backoff.ms = 1000
+	request.timeout.ms = 120000
+	retries = 5
+	retry.backoff.ms = 1000
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 60000
+	socket.connection.setup.timeout.ms = 30000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:20.745+03:00  WARN 48749 --- [kafkareader] [nio-5252-exec-3] o.a.k.clients.admin.KafkaAdminClient     : [AdminClient clientId=kafkareader-config-check-1748544440742-50] Overriding the default value for default.api.timeout.ms (0) with the explicitly configured request timeout 120000
+2025-05-29T21:47:20.745+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] o.a.k.clients.admin.AdminClientConfig    : These configurations '[socket.timeout.ms, max.block.ms]' were supplied but are not used yet.
+2025-05-29T21:47:20.745+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:20.745+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:20.745+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544440745
+2025-05-29T21:47:20.746+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : AdminClient создан, проверяем подключение...
+2025-05-29T21:47:20.746+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Запрашиваем список топиков...
+2025-05-29T21:47:20.896+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-5] kafkareader.service.KafkaConfigService   : Получено 2 топиков
+2025-05-29T21:47:20.897+03:00  INFO 48749 --- [kafkareader] [r-1748544440603] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-topic-lister-1748544440603 unregistered
+2025-05-29T21:47:20.898+03:00  INFO 48749 --- [kafkareader] [r-1748544440603] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:20.898+03:00  INFO 48749 --- [kafkareader] [r-1748544440603] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:20.898+03:00  INFO 48749 --- [kafkareader] [r-1748544440603] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:21.051+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Подключение к Kafka успешно установлено. Доступные топики: [test, logs]
+2025-05-29T21:47:21.051+03:00  INFO 48749 --- [kafkareader] [748544440742-50] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-config-check-1748544440742-50 unregistered
+2025-05-29T21:47:21.052+03:00  INFO 48749 --- [kafkareader] [748544440742-50] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:21.052+03:00  INFO 48749 --- [kafkareader] [748544440742-50] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:21.052+03:00  INFO 48749 --- [kafkareader] [748544440742-50] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:21.052+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-admin-1748544441052-50
+	connections.max.idle.ms = 300000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 2147483647
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:21.053+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:21.053+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:21.053+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544441053
+2025-05-29T21:47:21.054+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Spring бины успешно обновлены
+2025-05-29T21:47:21.057+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Получены bootstrap servers: 192.168.45.128:9092
+2025-05-29T21:47:21.059+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-3] kafkareader.service.KafkaConfigService   : Получен topic: null
+2025-05-29T21:47:22.664+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Обновление конфигурации Kafka
+2025-05-29T21:47:22.664+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Параметры подключения: bootstrapServers=192.168.45.128:9092, topic=test, username=, password=***
+2025-05-29T21:47:22.664+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Закрытие AdminClient...
+2025-05-29T21:47:22.665+03:00  INFO 48749 --- [kafkareader] [748544441052-50] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-admin-1748544441052-50 unregistered
+2025-05-29T21:47:22.666+03:00  INFO 48749 --- [kafkareader] [748544441052-50] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:22.666+03:00  INFO 48749 --- [kafkareader] [748544441052-50] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:22.667+03:00  INFO 48749 --- [kafkareader] [748544441052-50] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:22.667+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : AdminClient успешно закрыт
+2025-05-29T21:47:23.685+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Найдено 1 активных конфигураций
+2025-05-29T21:47:23.691+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Деактивирована конфигурация: id=4, bootstrapServers=192.168.45.128:9092
+2025-05-29T21:47:23.695+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Создана новая конфигурация: id=5, bootstrapServers=192.168.45.128:9092, topic=test, active=true
+2025-05-29T21:47:23.695+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Конфигурация Kafka для проверки подключения:
+2025-05-29T21:47:23.695+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : metadata.max.age.ms = 300000
+2025-05-29T21:47:23.695+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : socket.connection.setup.timeout.max.ms = 60000
+2025-05-29T21:47:23.695+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : reconnect.backoff.max.ms = 5000
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : socket.connection.setup.timeout.ms = 30000
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : request.timeout.ms = 120000
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : reconnect.backoff.ms = 1000
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : bootstrap.servers = 192.168.45.128:9092
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : retry.backoff.ms = 1000
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : socket.timeout.ms = 60000
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : security.protocol = PLAINTEXT
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : retries = 5
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : client.dns.lookup = use_all_dns_ips
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : max.block.ms = 120000
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : connections.max.idle.ms = 540000
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : client.id = kafkareader-config-check-1748544443695-55
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Создаем AdminClient с bootstrap.servers=192.168.45.128:9092
+2025-05-29T21:47:23.696+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-config-check-1748544443695-55
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 5000
+	reconnect.backoff.ms = 1000
+	request.timeout.ms = 120000
+	retries = 5
+	retry.backoff.ms = 1000
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 60000
+	socket.connection.setup.timeout.ms = 30000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:23.698+03:00  WARN 48749 --- [kafkareader] [nio-5252-exec-8] o.a.k.clients.admin.KafkaAdminClient     : [AdminClient clientId=kafkareader-config-check-1748544443695-55] Overriding the default value for default.api.timeout.ms (0) with the explicitly configured request timeout 120000
+2025-05-29T21:47:23.698+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] o.a.k.clients.admin.AdminClientConfig    : These configurations '[socket.timeout.ms, max.block.ms]' were supplied but are not used yet.
+2025-05-29T21:47:23.698+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:23.698+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:23.698+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544443698
+2025-05-29T21:47:23.698+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : AdminClient создан, проверяем подключение...
+2025-05-29T21:47:23.698+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Запрашиваем список топиков...
+2025-05-29T21:47:24.001+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Подключение к Kafka успешно установлено. Доступные топики: [test, logs]
+2025-05-29T21:47:24.001+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Проверяем существование топика test...
+2025-05-29T21:47:24.001+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Топик test существует
+2025-05-29T21:47:24.053+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Информация о топике test: партиций=1, внутренний=false
+2025-05-29T21:47:24.053+03:00  INFO 48749 --- [kafkareader] [748544443695-55] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-config-check-1748544443695-55 unregistered
+2025-05-29T21:47:24.054+03:00  INFO 48749 --- [kafkareader] [748544443695-55] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:24.054+03:00  INFO 48749 --- [kafkareader] [748544443695-55] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:24.054+03:00  INFO 48749 --- [kafkareader] [748544443695-55] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:24.055+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-admin-1748544444054-55
+	connections.max.idle.ms = 300000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 2147483647
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:24.056+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:24.056+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:24.056+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544444055
+2025-05-29T21:47:24.057+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Spring бины успешно обновлены
+2025-05-29T21:47:24.057+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Обновление конфигурации Kafka
+2025-05-29T21:47:24.057+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Параметры подключения: bootstrapServers=192.168.45.128:9092, topic=test, username=, password=***
+2025-05-29T21:47:24.057+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Закрытие AdminClient...
+2025-05-29T21:47:24.057+03:00  INFO 48749 --- [kafkareader] [748544444054-55] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-admin-1748544444054-55 unregistered
+2025-05-29T21:47:24.057+03:00  INFO 48749 --- [kafkareader] [748544444054-55] o.a.k.c.a.i.AdminMetadataManager         : [AdminClient clientId=kafkareader-admin-1748544444054-55] Metadata update failed
+
+org.apache.kafka.common.errors.TimeoutException: Timed out waiting to send the call. Call: fetchMetadata
+
+2025-05-29T21:47:24.057+03:00  INFO 48749 --- [kafkareader] [748544444054-55] o.a.k.clients.admin.KafkaAdminClient     : [AdminClient clientId=kafkareader-admin-1748544444054-55] Timed out 1 remaining operation(s) during close.
+2025-05-29T21:47:24.058+03:00  INFO 48749 --- [kafkareader] [748544444054-55] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:24.058+03:00  INFO 48749 --- [kafkareader] [748544444054-55] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:24.058+03:00  INFO 48749 --- [kafkareader] [748544444054-55] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:24.058+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : AdminClient успешно закрыт
+2025-05-29T21:47:24.060+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Получены bootstrap servers: 192.168.45.128:9092
+2025-05-29T21:47:24.061+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-8] kafkareader.service.KafkaConfigService   : Получен topic: test
+2025-05-29T21:47:25.076+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Найдено 1 активных конфигураций
+2025-05-29T21:47:25.082+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : Получены bootstrap servers: 192.168.45.128:9092
+2025-05-29T21:47:25.083+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Деактивирована конфигурация: id=5, bootstrapServers=192.168.45.128:9092
+2025-05-29T21:47:25.084+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-9] kafkareader.service.KafkaConfigService   : Получен topic: null
+2025-05-29T21:47:25.086+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Создана новая конфигурация: id=6, bootstrapServers=192.168.45.128:9092, topic=test, active=true
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Конфигурация Kafka для проверки подключения:
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : metadata.max.age.ms = 300000
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : socket.connection.setup.timeout.max.ms = 60000
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : reconnect.backoff.max.ms = 5000
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : socket.connection.setup.timeout.ms = 30000
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : request.timeout.ms = 120000
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : reconnect.backoff.ms = 1000
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : bootstrap.servers = 192.168.45.128:9092
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : retry.backoff.ms = 1000
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : socket.timeout.ms = 60000
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : security.protocol = PLAINTEXT
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : retries = 5
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : client.dns.lookup = use_all_dns_ips
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : max.block.ms = 120000
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : connections.max.idle.ms = 540000
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : client.id = kafkareader-config-check-1748544445087-53
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Создаем AdminClient с bootstrap.servers=192.168.45.128:9092
+2025-05-29T21:47:25.087+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-config-check-1748544445087-53
+	connections.max.idle.ms = 540000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 5000
+	reconnect.backoff.ms = 1000
+	request.timeout.ms = 120000
+	retries = 5
+	retry.backoff.ms = 1000
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 60000
+	socket.connection.setup.timeout.ms = 30000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:25.089+03:00  WARN 48749 --- [kafkareader] [nio-5252-exec-6] o.a.k.clients.admin.KafkaAdminClient     : [AdminClient clientId=kafkareader-config-check-1748544445087-53] Overriding the default value for default.api.timeout.ms (0) with the explicitly configured request timeout 120000
+2025-05-29T21:47:25.089+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] o.a.k.clients.admin.AdminClientConfig    : These configurations '[socket.timeout.ms, max.block.ms]' were supplied but are not used yet.
+2025-05-29T21:47:25.089+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:25.089+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:25.089+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544445089
+2025-05-29T21:47:25.089+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : AdminClient создан, проверяем подключение...
+2025-05-29T21:47:25.089+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Запрашиваем список топиков...
+2025-05-29T21:47:25.096+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] kafkareader.service.KafkaConfigService   : Получен topic: test
+2025-05-29T21:47:25.098+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-topic-info-1748544445098
+	connections.max.idle.ms = 300000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 2147483647
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:25.099+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:25.099+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:25.099+03:00  INFO 48749 --- [kafkareader] [io-5252-exec-10] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544445099
+2025-05-29T21:47:25.382+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Подключение к Kafka успешно установлено. Доступные топики: [test, logs]
+2025-05-29T21:47:25.382+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Проверяем существование топика test...
+2025-05-29T21:47:25.382+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Топик test существует
+2025-05-29T21:47:25.401+03:00  INFO 48749 --- [kafkareader] [o-1748544445098] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-topic-info-1748544445098 unregistered
+2025-05-29T21:47:25.402+03:00  INFO 48749 --- [kafkareader] [o-1748544445098] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:25.402+03:00  INFO 48749 --- [kafkareader] [o-1748544445098] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:25.402+03:00  INFO 48749 --- [kafkareader] [o-1748544445098] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:25.431+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Информация о топике test: партиций=1, внутренний=false
+2025-05-29T21:47:25.431+03:00  INFO 48749 --- [kafkareader] [748544445087-53] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-config-check-1748544445087-53 unregistered
+2025-05-29T21:47:25.432+03:00  INFO 48749 --- [kafkareader] [748544445087-53] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:25.432+03:00  INFO 48749 --- [kafkareader] [748544445087-53] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:25.432+03:00  INFO 48749 --- [kafkareader] [748544445087-53] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed
+2025-05-29T21:47:25.432+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-admin-1748544445432-53
+	connections.max.idle.ms = 300000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 2147483647
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:25.432+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:25.432+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:25.432+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544445432
+2025-05-29T21:47:25.433+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Spring бины успешно обновлены
+2025-05-29T21:47:25.435+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Получены bootstrap servers: 192.168.45.128:9092
+2025-05-29T21:47:25.435+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-6] kafkareader.service.KafkaConfigService   : Получен topic: test
+2025-05-29T21:47:26.453+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-1] kafkareader.service.KafkaConfigService   : Получены bootstrap servers: 192.168.45.128:9092
+2025-05-29T21:47:26.456+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-1] kafkareader.service.KafkaConfigService   : Получен topic: test
+2025-05-29T21:47:26.467+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-2] kafkareader.service.KafkaConfigService   : Получен topic: test
+2025-05-29T21:47:26.470+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-2] o.a.k.clients.admin.AdminClientConfig    : AdminClientConfig values:
+	auto.include.jmx.reporter = true
+	bootstrap.servers = [192.168.45.128:9092]
+	client.dns.lookup = use_all_dns_ips
+	client.id = kafkareader-topic-info-1748544446470
+	connections.max.idle.ms = 300000
+	default.api.timeout.ms = 60000
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	receive.buffer.bytes = 65536
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 2147483647
+	retry.backoff.ms = 100
+	sasl.client.callback.handler.class = null
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.login.callback.handler.class = null
+	sasl.login.class = null
+	sasl.login.connect.timeout.ms = null
+	sasl.login.read.timeout.ms = null
+	sasl.login.refresh.buffer.seconds = 300
+	sasl.login.refresh.min.period.seconds = 60
+	sasl.login.refresh.window.factor = 0.8
+	sasl.login.refresh.window.jitter = 0.05
+	sasl.login.retry.backoff.max.ms = 10000
+	sasl.login.retry.backoff.ms = 100
+	sasl.mechanism = GSSAPI
+	sasl.oauthbearer.clock.skew.seconds = 30
+	sasl.oauthbearer.expected.audience = null
+	sasl.oauthbearer.expected.issuer = null
+	sasl.oauthbearer.jwks.endpoint.refresh.ms = 3600000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.max.ms = 10000
+	sasl.oauthbearer.jwks.endpoint.retry.backoff.ms = 100
+	sasl.oauthbearer.jwks.endpoint.url = null
+	sasl.oauthbearer.scope.claim.name = scope
+	sasl.oauthbearer.sub.claim.name = sub
+	sasl.oauthbearer.token.endpoint.url = null
+	security.protocol = PLAINTEXT
+	security.providers = null
+	send.buffer.bytes = 131072
+	socket.connection.setup.timeout.max.ms = 30000
+	socket.connection.setup.timeout.ms = 10000
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+	ssl.endpoint.identification.algorithm = https
+	ssl.engine.factory.class = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.certificate.chain = null
+	ssl.keystore.key = null
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLSv1.3
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.certificates = null
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+
+2025-05-29T21:47:26.472+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-2] o.a.kafka.common.utils.AppInfoParser     : Kafka version: 3.6.1
+2025-05-29T21:47:26.472+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-2] o.a.kafka.common.utils.AppInfoParser     : Kafka commitId: 5e3c2b738d253ff5
+2025-05-29T21:47:26.472+03:00  INFO 48749 --- [kafkareader] [nio-5252-exec-2] o.a.kafka.common.utils.AppInfoParser     : Kafka startTimeMs: 1748544446472
+2025-05-29T21:47:26.801+03:00  INFO 48749 --- [kafkareader] [o-1748544446470] o.a.kafka.common.utils.AppInfoParser     : App info kafka.admin.client for kafkareader-topic-info-1748544446470 unregistered
+2025-05-29T21:47:26.802+03:00  INFO 48749 --- [kafkareader] [o-1748544446470] o.apache.kafka.common.metrics.Metrics    : Metrics scheduler closed
+2025-05-29T21:47:26.802+03:00  INFO 48749 --- [kafkareader] [o-1748544446470] o.apache.kafka.common.metrics.Metrics    : Closing reporter org.apache.kafka.common.metrics.JmxReporter
+2025-05-29T21:47:26.803+03:00  INFO 48749 --- [kafkareader] [o-1748544446470] o.apache.kafka.common.metrics.Metrics    : Metrics reporters closed

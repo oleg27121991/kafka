@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kafka Log Reader</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23000000' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z'/></svg>">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+</head>
+<body>
+    <!-- Боковое меню -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <h2>Kafka Log Reader</h2>
+        </div>
+        <div class="sidebar-menu">
+            <a href="#connection" class="menu-item active" data-tab="connection">
+                <i class="fas fa-plug"></i>
+                <span>Подключение</span>
+            </a>
+            <a href="#continuous" class="menu-item" data-tab="continuous">
+                <i class="fas fa-stream"></i>
+                <span>Непрерывная запись</span>
+            </a>
+            <a href="#metrics" class="menu-item" data-tab="metrics">
+                <i class="fas fa-chart-line"></i>
+                <span>Метрики</span>
+            </a>
+            <a href="#management" class="menu-item" data-tab="management">
+                <i class="fas fa-cogs"></i>
+                <span>Управление</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Кнопка сворачивания меню -->
+    <button class="sidebar-toggle" title="Свернуть/развернуть меню">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        <!-- Вкладка подключения -->
+        <section id="connection" class="tab-content active">
+            <div class="section">
+                <h2>Настройка подключения к Kafka</h2>
+                <div class="kafka-connection-form">
+                    <div class="form-group">
+                        <label for="kafkaBootstrapServers" class="required">Bootstrap Servers:</label>
+                        <input type="text" id="kafkaBootstrapServers" class="required" placeholder="192.168.45.128:9092" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="kafkaTopic">Имя топика:</label>
+                        <div class="topic-select-container">
+                            <select id="kafkaTopic" class="form-control">
+                                <option value="">Выберите топик</option>
+                            </select>
+                            <button type="button" class="refresh-topics" onclick="loadExistingTopics()" title="Обновить список топиков">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="kafkaUsername">Имя пользователя (опционально):</label>
+                        <input type="text" id="kafkaUsername" placeholder="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="kafkaPassword">Пароль (опционально):</label>
+                        <div class="password-container">
+                            <input type="password" id="kafkaPassword" class="form-control">
+                            <button type="button" class="toggle-password" onclick="togglePassword()">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button id="saveKafkaConfig" onclick="saveKafkaConfig()">Сохранить настройки</button>
+                        <button id="testKafkaConnection" onclick="testKafkaConnection()">Проверить подключение</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка непрерывной записи -->
+        <section id="continuous" class="tab-content">
+            <div class="section">
+                <h2>Непрерывная запись</h2>
+                <div class="upload-section">
+                    <label for="continuousFileInput" class="file-input-label">Выбрать файл</label>
+                    <input type="file" id="continuousFileInput" accept=".log,.txt">
+                    <div id="continuousSelectedFileName"></div>
+                    <div class="speed-controls">
+                        <div class="speed-control">
+                            <label class="speed-label">
+                                <input type="radio" name="speedType" value="messages" checked id="speedTypeMessages">
+                                <span>Целевая скорость (сообщений/сек):</span>
+                            </label>
+                            <input type="number" id="targetSpeed" min="1" value="1000">
+                        </div>
+                        <div class="speed-control">
+                            <label class="speed-label">
+                                <input type="radio" name="speedType" value="data" id="speedTypeData">
+                                <span>Целевая скорость передачи (МБ/сек):</span>
+                            </label>
+                            <input type="number" id="targetDataSpeed" min="1" step="0.1" value="1" disabled>
+                        </div>
+                    </div>
+                    <button id="startContinuousBtn" onclick="startContinuousWriting()" disabled>Начать запись</button>
+                    <button id="stopContinuousBtn" onclick="stopContinuousWriting()" style="display: none;">Остановить запись</button>
+                    <button id="clearContinuousFileBtn" onclick="clearContinuousFile()" style="display: none;">Очистить выбор</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка метрик -->
+        <section id="metrics" class="tab-content">
+            <div class="section">
+                <h2>Метрики обработки</h2>
+                <div id="metrics" class="metrics">
+                    <p>Общее время обработки: <span id="totalTime">-</span> сек</p>
+                    <p>Средняя скорость записи: <span id="avgSpeed">-</span> сообщений/сек</p>
+                    <p>Средняя скорость передачи: <span id="avgDataSpeed">-</span> МБ/сек</p>
+                    <p>Записано в Kafka: <span id="kafkaLines">-</span></p>
+                    <p>Размер файла: <span id="fileSize">-</span> MB</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка управления -->
+        <section id="management" class="tab-content">
+            <div class="section">
+                <h2>Управление Kafka</h2>
+                <div class="kafka-controls">
+                    <button id="recreateTopicBtn" onclick="showConfirmModal()">Пересоздать топик</button>
+                    <div id="topicSpinner" class="spinner" style="display: none;"></div>
+                </div>
+                <div class="topic-info">
+                    <p>Название топика: <span id="topicName">-</span></p>
+                    <p>Количество партиций: <span id="partitionCount">-</span></p>
+                    <p>Всего сообщений: <span id="totalMessages">-</span></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Модальные окна -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3>Подтверждение</h3>
+            <p>Пересоздание топика полностью удалит топик и создаст его заново. Все сообщения будут потеряны.</p>
+            <div class="modal-buttons">
+                <button class="modal-button confirm" onclick="clearTopic()">Подтвердить</button>
+                <button class="modal-button cancel" onclick="hideConfirmModal()">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <h3>Сообщение</h3>
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button onclick="hideMessageModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="continuousModal" class="modal continuous-modal">
+        <div class="modal-content">
+            <h3>Статус записи</h3>
+            <div class="continuous-stats">
+                <p>Статус: <span id="continuousStatus">-</span></p>
+                <p>Файл: <span id="continuousFileName">-</span></p>
+                <p>Отправлено сообщений: <span id="continuousMessagesSent">-</span></p>
+                <p>Скорость: <span id="continuousSpeed">-</span> сообщений/сек</p>
+                <p>Скорость передачи: <span id="continuousDataSpeed">-</span> МБ/сек</p>
+            </div>
+            <div class="modal-buttons">
+                <button onclick="stopContinuousWriting()" class="stop-btn">Остановить</button>
+                <button onclick="toggleMinimizeModal()" class="minimize-btn" id="minimizeBtn">Свернуть</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="minimizedContinuousStatus" class="minimized-status" style="display: none;">
+        <div class="minimized-content">
+            <div class="minimized-stats">
+                <p>Скорость: <span id="minimizedSpeed">-</span> сообщений/сек</p>
+                <p>Передача: <span id="minimizedDataSpeed">-</span> МБ/сек</p>
+            </div>
+            <div class="minimized-buttons">
+                <button onclick="stopContinuousWriting()" class="stop-btn">Стоп</button>
+                <button onclick="toggleMinimizeModal()" class="expand-btn" id="expandBtn">Развернуть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Контейнер для сообщений -->
+    <div id="messageContainer" class="message" style="display: none;"></div>
+
+    <script src="js/app.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+</body>
+</html> 

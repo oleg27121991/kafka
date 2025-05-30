@@ -1,0 +1,17 @@
+version: '3.3'
+
+services:
+  # Приложение
+  app:
+    image: veremeioleg/kafkareader:latest
+    container_name: kafkareader-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5433/kafkareader
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+    volumes:
+      - ./logs:/app/logs
+    extra_hosts:
+      - "host.docker.internal:host-gateway" 
