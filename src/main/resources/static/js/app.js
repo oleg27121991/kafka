@@ -147,6 +147,15 @@ async function startContinuousWriting() {
         return;
     }
 
+    // Сразу показываем модальное окно и меняем состояние кнопок
+    showContinuousModal();
+    document.getElementById('startContinuousBtn').style.display = 'none';
+    document.getElementById('stopContinuousBtn').style.display = 'inline-block';
+    document.getElementById('stopContinuousBtn').disabled = false;
+
+    // Запускаем обновление статуса до отправки запроса
+    startStatusUpdates();
+
     const formData = new FormData();
     formData.append('file', selectedContinuousFile);
     
@@ -170,13 +179,18 @@ async function startContinuousWriting() {
             throw new Error('Ошибка при запуске записи');
         }
 
-        document.getElementById('startContinuousBtn').style.display = 'none';
-        document.getElementById('stopContinuousBtn').style.display = 'inline-block';
-        showContinuousModal();
-        startStatusUpdates();
+        // Делаем первый запрос метрик после успешного старта
+        await updateContinuousStatus();
     } catch (error) {
         console.error('Ошибка:', error);
         showMessage('Ошибка при запуске записи: ' + error.message);
+        // В случае ошибки возвращаем кнопки в исходное состояние
+        document.getElementById('startContinuousBtn').style.display = 'inline-block';
+        document.getElementById('stopContinuousBtn').style.display = 'none';
+        document.getElementById('startContinuousBtn').disabled = false;
+        document.getElementById('stopContinuousBtn').disabled = true;
+        hideContinuousModal();
+        stopStatusUpdates();
     }
 }
 
@@ -212,6 +226,11 @@ function hideCalculatingMetricsModal() {
 async function stopContinuousWriting() {
     try {
         showCalculatingMetricsModal();
+        
+        // Сразу меняем состояние кнопок
+        document.getElementById('startContinuousBtn').style.display = 'inline-block';
+        document.getElementById('stopContinuousBtn').style.display = 'none';
+        
         const response = await fetch('/api/writer/stop', {
             method: 'POST'
         });
@@ -242,17 +261,9 @@ async function stopContinuousWriting() {
         // Очищаем историю
         dataSpeedHistory = [];
         messagesHistory = [];
-
-        // Не скрываем модальное окно сразу, оно закроется после полной остановки
-        const startButton = document.getElementById('startContinuousBtn');
-        const stopButton = document.getElementById('stopContinuousBtn');
-        const clearButton = document.getElementById('clearContinuousFileBtn');
-        
-        if (startButton) startButton.style.display = 'inline-block';
-        if (stopButton) stopButton.style.display = 'none';
-        if (clearButton) clearButton.style.display = 'inline-block';
         
         stopStatusUpdates();
+        hideContinuousModal();
         
         // Скрываем модальное окно подсчета метрик
         hideCalculatingMetricsModal();
@@ -260,11 +271,29 @@ async function stopContinuousWriting() {
         console.error('Ошибка:', error);
         showMessage('Ошибка при остановке записи: ' + error.message);
         hideCalculatingMetricsModal();
+        
+        // В случае ошибки все равно возвращаем кнопки в исходное состояние
+        document.getElementById('startContinuousBtn').style.display = 'inline-block';
+        document.getElementById('stopContinuousBtn').style.display = 'none';
     }
 }
 
 function startStatusUpdates() {
-    statusUpdateInterval = setInterval(updateContinuousStatus, 1000);
+    // Очищаем предыдущий интервал, если он существует
+    if (statusUpdateInterval) {
+        clearInterval(statusUpdateInterval);
+    }
+    
+    // Запускаем новый интервал
+    statusUpdateInterval = setInterval(async () => {
+        try {
+            await updateContinuousStatus();
+        } catch (error) {
+            console.error('Ошибка в интервале обновления статуса:', error);
+        }
+    }, 1000);
+    
+    console.log('Запущен интервал обновления статуса');
 }
 
 function stopStatusUpdates() {
@@ -275,12 +304,15 @@ function stopStatusUpdates() {
 
 async function updateContinuousStatus() {
     try {
+        console.log('Запрос метрик...');
         const response = await fetch('/api/writer/metrics');
+        
         if (!response.ok) {
             throw new Error('Ошибка при получении статуса');
         }
 
         const status = await response.json();
+        console.log('Получен статус:', status);
         
         // Сохраняем текущие значения в историю
         if (status.isRunning) {
@@ -295,12 +327,24 @@ async function updateContinuousStatus() {
         updateMetrics(status);
 
         if (!status.isRunning) {
+            console.log('Процесс остановлен, останавливаем обновление статуса');
             stopStatusUpdates();
             hideContinuousModal();
             document.getElementById('minimizedContinuousStatus').style.display = 'none';
+            
+            // Разблокируем кнопки при остановке
+            document.getElementById('startContinuousBtn').style.display = 'inline-block';
+            document.getElementById('stopContinuousBtn').style.display = 'none';
+            document.getElementById('startContinuousBtn').disabled = false;
+            document.getElementById('stopContinuousBtn').disabled = true;
         }
     } catch (error) {
         console.error('Ошибка при обновлении статуса:', error);
+        // В случае ошибки также разблокируем кнопки
+        document.getElementById('startContinuousBtn').style.display = 'inline-block';
+        document.getElementById('stopContinuousBtn').style.display = 'none';
+        document.getElementById('startContinuousBtn').disabled = false;
+        document.getElementById('stopContinuousBtn').disabled = true;
     }
 }
 

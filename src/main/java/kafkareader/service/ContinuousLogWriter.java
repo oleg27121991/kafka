@@ -202,7 +202,6 @@ public class ContinuousLogWriter {
                 // Если достигли конца файла, начинаем сначала
                 if (currentIndex >= validLines.size()) {
                     currentIndex = 0;
-                    log.info("Достигнут конец файла, начинаем сначала");
                 }
 
                 // Логируем статистику каждые 100,000 сообщений
