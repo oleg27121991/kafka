@@ -178,6 +178,22 @@ public class ContinuousLogWriter {
                                 messagesSent.incrementAndGet();
                                 bytesSent.addAndGet(line.getBytes(StandardCharsets.UTF_8).length);
                                 linesWrittenToKafka++;
+                                
+                                // Контроль скорости
+                                if (targetSpeed > 0 || targetDataSpeed > 0) {
+                                    long currentTime = System.currentTimeMillis();
+                                    long elapsedTime = currentTime - startTime.get();
+                                    if (elapsedTime > 0) {
+                                        double currentSpeed = (double) messagesSent.get() / (elapsedTime / 1000.0);
+                                        double currentDataSpeed = (double) bytesSent.get() / (elapsedTime / 1000.0) / (1024 * 1024);
+                                        
+                                        // Если превышаем целевую скорость, делаем паузу
+                                        if ((targetSpeed > 0 && currentSpeed > targetSpeed) || 
+                                            (targetDataSpeed > 0 && currentDataSpeed > targetDataSpeed)) {
+                                            Thread.sleep(10); // Пауза 10мс
+                                        }
+                                    }
+                                }
                             }
                             
                             retryCount = 0; // Сбрасываем счетчик попыток при успешной отправке
