@@ -242,26 +242,31 @@ async function stopContinuousWriting() {
         const metrics = await response.json();
         console.log('Получены метрики:', metrics);
         
+        // Добавляем текущие значения в историю для расчета средних
+        if (metrics.currentDataSpeed) {
+            dataSpeedHistory.push(metrics.currentDataSpeed);
+        }
+        if (metrics.currentSpeed) {
+            messagesHistory.push(metrics.currentSpeed);
+        }
+        
         // Рассчитываем средние значения на основе собранной истории
-        const avgDataSpeed = dataSpeedHistory.length > 0 
-            ? dataSpeedHistory.reduce((sum, speed) => sum + speed, 0) / dataSpeedHistory.length 
-            : 0;
+        if (dataSpeedHistory.length > 0) {
+            metrics.avgDataSpeed = dataSpeedHistory.reduce((sum, speed) => sum + speed, 0) / dataSpeedHistory.length;
+        }
             
-        const avgMessagesSpeed = messagesHistory.length > 0
-            ? messagesHistory.reduce((sum, speed) => sum + speed, 0) / messagesHistory.length
-            : 0;
+        if (messagesHistory.length > 0) {
+            metrics.avgSpeed = messagesHistory.reduce((sum, speed) => sum + speed, 0) / messagesHistory.length;
+        }
         
-        // Добавляем средние значения в метрики
-        metrics.avgDataSpeed = avgDataSpeed;
-        metrics.avgMessagesSpeed = avgMessagesSpeed;
-        metrics.avgSpeed = avgMessagesSpeed; // Добавляем среднюю скорость сообщений
+        // Добавляем запись в историю с рассчитанными средними значениями
+        addToMetricsHistory(metrics);
         
-        updateMetrics(metrics);
-        
-        // Очищаем историю
+        // Очищаем историю после добавления записи
         dataSpeedHistory = [];
         messagesHistory = [];
         
+        updateMetrics(metrics);
         stopStatusUpdates();
         hideContinuousModal();
         
@@ -374,7 +379,153 @@ function toggleMinimizeModal() {
     }
 }
 
-// Обновление метрик
+// Глобальные переменные для графиков
+let speedChart = null;
+let dataSpeedChart = null;
+let metricsHistory = [];
+
+// Инициализация графиков
+function initializeCharts() {
+    // График скорости обработки
+    const speedCtx = document.getElementById('speedChart').getContext('2d');
+    speedChart = new Chart(speedCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Скорость обработки (сообщений/сек)',
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // График скорости передачи данных
+    const dataSpeedCtx = document.getElementById('dataSpeedChart').getContext('2d');
+    dataSpeedChart = new Chart(dataSpeedCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Скорость передачи (МБ/сек)',
+                data: [],
+                borderColor: 'rgb(153, 102, 255)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// Обновление графиков
+function updateCharts(metrics) {
+    const timestamp = new Date().toLocaleTimeString();
+    
+    // Обновляем график скорости обработки
+    speedChart.data.labels.push(timestamp);
+    speedChart.data.datasets[0].data.push(metrics.currentSpeed || 0);
+    
+    // Ограничиваем количество точек на графике
+    if (speedChart.data.labels.length > 20) {
+        speedChart.data.labels.shift();
+        speedChart.data.datasets[0].data.shift();
+    }
+    
+    speedChart.update();
+
+    // Обновляем график скорости передачи данных
+    dataSpeedChart.data.labels.push(timestamp);
+    dataSpeedChart.data.datasets[0].data.push(metrics.currentDataSpeed || 0);
+    
+    // Ограничиваем количество точек на графике
+    if (dataSpeedChart.data.labels.length > 20) {
+        dataSpeedChart.data.labels.shift();
+        dataSpeedChart.data.datasets[0].data.shift();
+    }
+    
+    dataSpeedChart.update();
+}
+
+// Добавление записи в историю
+function addToMetricsHistory(metrics) {
+    const historyEntry = {
+        date: new Date().toLocaleString(),
+        servers: document.getElementById('kafkaBootstrapServers').value,
+        topic: document.getElementById('kafkaTopic').value,
+        fileName: metrics.fileName || '-',
+        processingTime: (metrics.totalProcessingTimeMs / 1000).toFixed(2),
+        avgSpeed: metrics.avgSpeed ? metrics.avgSpeed.toFixed(2) : '0.00',
+        avgDataSpeed: metrics.avgDataSpeed ? metrics.avgDataSpeed.toFixed(4) : '0.0000',
+        messagesSent: metrics.messagesSent || 0,
+        fileSize: metrics.fileSizeBytes ? (metrics.fileSizeBytes / (1024 * 1024)).toFixed(2) : '0.00'
+    };
+
+    metricsHistory.unshift(historyEntry);
+    
+    // Ограничиваем историю последними 10 записями
+    if (metricsHistory.length > 10) {
+        metricsHistory.pop();
+    }
+
+    updateMetricsHistoryList();
+}
+
+// Обновление списка истории
+function updateMetricsHistoryList() {
+    const historyList = document.getElementById('metricsHistoryList');
+    const template = document.getElementById('historyItemTemplate');
+    
+    historyList.innerHTML = '';
+
+    metricsHistory.forEach(entry => {
+        const clone = template.content.cloneNode(true);
+        
+        // Заполняем основные данные
+        clone.querySelector('.history-date').textContent = entry.date;
+        clone.querySelector('.history-servers').textContent = entry.servers;
+        clone.querySelector('.history-topic').textContent = entry.topic;
+        
+        // Заполняем детали
+        clone.querySelector('.history-file').textContent = entry.fileName;
+        clone.querySelector('.history-time').textContent = `${entry.processingTime} сек`;
+        clone.querySelector('.history-speed').textContent = `${entry.avgSpeed} сообщений/сек`;
+        clone.querySelector('.history-data-speed').textContent = `${entry.avgDataSpeed} МБ/сек`;
+        clone.querySelector('.history-messages').textContent = entry.messagesSent.toLocaleString();
+        clone.querySelector('.history-file-size').textContent = `${entry.fileSize} MB`;
+        
+        // Добавляем обработчик для раскрытия/скрытия деталей
+        const header = clone.querySelector('.history-item-header');
+        const details = clone.querySelector('.history-item-details');
+        const toggleBtn = clone.querySelector('.toggle-details');
+        
+        header.addEventListener('click', () => {
+            details.classList.toggle('active');
+            toggleBtn.classList.toggle('active');
+        });
+        
+        historyList.appendChild(clone);
+    });
+}
+
+// Обновляем функцию updateMetrics
 function updateMetrics(metrics) {
     const totalTime = metrics.totalProcessingTimeMs ? (metrics.totalProcessingTimeMs / 1000).toFixed(2) : '0.00';
     const currentSpeed = metrics.currentSpeed ? metrics.currentSpeed.toFixed(2) : '0.00';
@@ -398,23 +549,22 @@ function updateMetrics(metrics) {
         }
     };
 
-    // Обновляем метрики в модальном окне
+    // Обновляем текущие метрики
+    updateElementText('totalTime', totalTime);
+    updateElementText('currentSpeed', currentSpeed);
+    updateElementText('currentDataSpeed', currentDataSpeed);
+    updateElementText('kafkaLines', linesWritten.toLocaleString());
+
+    // Обновляем статус в модальном окне
     updateElementText('continuousStatus', isRunning ? 'Активна' : (isStopping ? 'Останавливается...' : 'Остановлена'));
     updateElementText('continuousFileName', metrics.fileName || '-');
     updateElementText('continuousMessagesSent', messagesSent.toLocaleString());
     updateElementText('continuousSpeed', currentSpeed);
     updateElementText('continuousDataSpeed', currentDataSpeed);
 
-    // Обновляем метрики в свернутом окне
+    // Обновляем статус в свернутом окне
     updateElementText('minimizedSpeed', currentSpeed);
     updateElementText('minimizedDataSpeed', currentDataSpeed);
-
-    // Обновляем метрики в основном окне
-    updateElementText('totalTime', totalTime);
-    updateElementText('avgSpeed', avgSpeed);
-    updateElementText('avgDataSpeed', avgDataSpeed);
-    updateElementText('kafkaLines', linesWritten.toLocaleString());
-    updateElementText('fileSize', (fileSize / (1024 * 1024)).toFixed(2));
 
     // Управление состоянием кнопок и элементов управления
     const stopButton = document.getElementById('stopContinuousBtn');

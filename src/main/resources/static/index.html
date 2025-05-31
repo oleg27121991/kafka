@@ -118,12 +118,36 @@
         <section id="metrics" class="tab-content">
             <div class="section">
                 <h2>Метрики обработки</h2>
-                <div id="metrics" class="metrics">
-                    <p>Общее время обработки: <span id="totalTime">-</span> сек</p>
-                    <p>Средняя скорость записи: <span id="avgSpeed">-</span> сообщений/сек</p>
-                    <p>Средняя скорость передачи: <span id="avgDataSpeed">-</span> МБ/сек</p>
-                    <p>Записано в Kafka: <span id="kafkaLines">-</span></p>
-                    <p>Размер файла: <span id="fileSize">-</span> MB</p>
+                
+                <!-- Текущие метрики -->
+                <div class="current-metrics">
+                    <h3>Текущие метрики</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <h4>Общее время обработки</h4>
+                            <p><span id="totalTime">-</span> сек</p>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Текущая скорость</h4>
+                            <p><span id="currentSpeed">-</span> сообщений/сек</p>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Скорость передачи</h4>
+                            <p><span id="currentDataSpeed">-</span> МБ/сек</p>
+                        </div>
+                        <div class="metric-card">
+                            <h4>Записано в Kafka</h4>
+                            <p><span id="kafkaLines">-</span> сообщений</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- История запусков -->
+                <div class="metrics-history">
+                    <h3>История запусков</h3>
+                    <div class="history-list" id="metricsHistoryList">
+                        <!-- Записи будут добавлены динамически -->
+                    </div>
                 </div>
             </div>
         </section>
@@ -200,8 +224,53 @@
     <!-- Контейнер для сообщений -->
     <div id="messageContainer" class="message" style="display: none;"></div>
 
+    <!-- Шаблон для записи в истории -->
+    <template id="historyItemTemplate">
+        <div class="history-item">
+            <div class="history-item-header">
+                <div class="history-item-main">
+                    <span class="history-date"></span>
+                    <span class="history-servers"></span>
+                    <span class="history-topic"></span>
+                </div>
+                <button class="toggle-details">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+            <div class="history-item-details">
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <h4>Файл</h4>
+                        <p class="history-file"></p>
+                    </div>
+                    <div class="detail-item">
+                        <h4>Время обработки</h4>
+                        <p class="history-time"></p>
+                    </div>
+                    <div class="detail-item">
+                        <h4>Средняя скорость</h4>
+                        <p class="history-speed"></p>
+                    </div>
+                    <div class="detail-item">
+                        <h4>Средняя скорость передачи</h4>
+                        <p class="history-data-speed"></p>
+                    </div>
+                    <div class="detail-item">
+                        <h4>Сообщений</h4>
+                        <p class="history-messages"></p>
+                    </div>
+                    <div class="detail-item">
+                        <h4>Размер файла</h4>
+                        <p class="history-file-size"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <script src="js/app.js"></script>
     <script src="js/navigation.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html> 
