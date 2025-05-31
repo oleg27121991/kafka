@@ -1,27 +1,33 @@
 package kafkareader.service;
 
-import kafkareader.dto.KafkaConfigDTO;
-import kafkareader.dto.KafkaConnectionResult;
 import kafkareader.entity.KafkaConfig;
+import kafkareader.model.KafkaConfigDTO;
+import kafkareader.model.KafkaConnectionResult;
 import kafkareader.repository.KafkaConfigRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.admin.CreateTopicsResult;
-import org.apache.kafka.clients.admin.NewTopic;
-import org.apache.kafka.clients.admin.TopicDescription;
+import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.errors.UnknownTopicOrPartitionException;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.context.annotation.Lazy;
 
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static org.apache.kafka.common.config.SaslConfigs.SASL_JAAS_CONFIG;
+import static org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM;
+import static org.apache.kafka.common.security.auth.SecurityProtocol.PLAINTEXT;
+import static org.apache.kafka.common.security.auth.SecurityProtocol.SASL_PLAINTEXT;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -50,13 +57,16 @@ public class KafkaConfigService implements DisposableBean {
     private volatile KafkaTemplate<String, String> kafkaTemplate;
     private final KafkaConfigRepository kafkaConfigRepository;
     private ApplicationContext applicationContext;
-    
+
     @Autowired(required = false)
     private ContinuousLogWriter continuousLogWriter;
 
     private volatile boolean isCheckingConnection = false;
     private volatile long lastCheckTime = 0;
     private static final long CHECK_TIMEOUT = 5000; // 5 секунд таймаут на проверку
+
+    private volatile AdminClient connectionCheckClient;
+    private final Object connectionCheckLock = new Object();
 
     @Autowired
     public KafkaConfigService(KafkaConfigRepository kafkaConfigRepository) {
@@ -183,7 +193,7 @@ public class KafkaConfigService implements DisposableBean {
             try {
                 kafkaTemplate.flush();
                 kafkaTemplate = null;
-            } catch (Exception e) {
+        } catch (Exception e) {
                 log.error("Ошибка при закрытии KafkaTemplate: {}", e.getMessage());
             }
         }
@@ -194,7 +204,7 @@ public class KafkaConfigService implements DisposableBean {
         try {
             Properties props = new Properties();
             props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-            props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-cleanup-" + System.currentTimeMillis());
+            props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-cleanup-" + UUID.randomUUID().toString());
             props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
             props.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, 60000);
             
@@ -237,7 +247,7 @@ public class KafkaConfigService implements DisposableBean {
             // Закрываем все существующие соединения
             log.info("Закрываем существующие соединения...");
             closeAllConnections();
-            
+
             // Создаем новую конфигурацию
             KafkaConfig newConfig = new KafkaConfig();
             newConfig.setBootstrapServers(bootstrapServers);
@@ -288,14 +298,14 @@ public class KafkaConfigService implements DisposableBean {
                     props.put(SECURITY_PROTOCOL, "SASL_PLAINTEXT");
                     props.put(SASL_MECHANISM, "PLAIN");
                     props.put(SASL_JAAS_CONFIG, String.format(
-                        "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";",
-                        username, password
-                    ));
-                }
-                
+                    "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";",
+                    username, password
+                ));
+            }
+
                 adminClient = AdminClient.create(props);
                 log.info("AdminClient успешно создан");
-                
+
                 // Проверяем существование топика только если он указан
                 if (topic != null && !topic.trim().isEmpty()) {
                     log.info("Проверяем существование топика: {}", topic);
@@ -384,59 +394,55 @@ public class KafkaConfigService implements DisposableBean {
 
     public KafkaConnectionResult checkConnection(String bootstrapServers, String topic, String username, String password) {
         KafkaConnectionResult result = new KafkaConnectionResult();
-        result.setBootstrapServers(bootstrapServers);
-        result.setTopic(topic);
+        result.setSuccess(false);
 
-        try {
-            if (bootstrapServers == null || bootstrapServers.trim().isEmpty()) {
-                result.setSuccess(false);
-                result.setMessage("Bootstrap servers не может быть пустым");
+        if (bootstrapServers == null || bootstrapServers.trim().isEmpty()) {
+            result.setMessage("Bootstrap servers не указаны");
+            return result;
+        }
+
+        // Проверяем, не выполняется ли уже проверка подключения
+        if (isCheckingConnection) {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastCheckTime < CHECK_TIMEOUT) {
+                result.setMessage("Проверка подключения уже выполняется. Пожалуйста, подождите.");
                 return result;
             }
+        }
 
-            // Закрываем старый AdminClient
-            closeAdminClient();
+        isCheckingConnection = true;
+        lastCheckTime = System.currentTimeMillis();
 
-            Map<String, Object> props = new HashMap<>();
-            props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-            props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-connection-check-" + System.currentTimeMillis());
-            
-            // Базовые настройки подключения
-            props.put("request.timeout.ms", 5000);
-            props.put("socket.connection.setup.timeout.ms", 5000);
-            props.put("socket.connection.setup.timeout.max.ms", 5000);
-            props.put("connections.max.idle.ms", 540000);
-            props.put("metadata.max.age.ms", 300000);
-
-            // Добавляем настройки безопасности, если указаны учетные данные
-            if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
-                log.info("Добавляем настройки безопасности...");
-                props.put(SECURITY_PROTOCOL, "SASL_PLAINTEXT");
-                props.put(SASL_MECHANISM, "PLAIN");
-                props.put(SASL_JAAS_CONFIG, String.format(
-                    "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";",
-                    username, password
-                ));
-            } else {
-                props.put(SECURITY_PROTOCOL, "PLAINTEXT");
-            }
-
-            log.info("Проверка подключения к Kafka с настройками:");
-            props.forEach((key, value) -> {
-                if (key.toString().contains("password")) {
-                    log.info("{} = ***", key);
-                } else {
-                    log.info("{} = {}", key, value);
-                }
-            });
-
-            AdminClient client = null;
+        synchronized (connectionCheckLock) {
             try {
-                client = AdminClient.create(props);
-                adminClient = client; // Сохраняем ссылку для последующего закрытия
+                // Закрываем предыдущий клиент, если он существует
+                if (connectionCheckClient != null) {
+                    try {
+                        connectionCheckClient.close(Duration.ofSeconds(1));
+                    } catch (Exception e) {
+                        log.warn("Ошибка при закрытии предыдущего AdminClient: {}", e.getMessage());
+                    }
+                    connectionCheckClient = null;
+                }
+
+                Map<String, Object> props = new HashMap<>();
+                props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+                props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-connection-check");
+                props.put(SECURITY_PROTOCOL, "PLAINTEXT");
+
+                if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
+                    props.put(SECURITY_PROTOCOL, "SASL_PLAINTEXT");
+                    props.put(SASL_MECHANISM, "PLAIN");
+                    props.put(SASL_JAAS_CONFIG, 
+                        String.format("org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";", 
+                            username, password));
+                }
+
+                // Создаем новый клиент
+                connectionCheckClient = AdminClient.create(props);
                 
                 // Проверяем подключение с таймаутом
-                Set<String> topics = client.listTopics().names().get(5, TimeUnit.SECONDS);
+                Set<String> topics = connectionCheckClient.listTopics().names().get(5, TimeUnit.SECONDS);
                 result.setSuccess(true);
                 result.setMessage("Подключение к Kafka успешно установлено. Доступные топики: " + topics);
 
@@ -449,7 +455,7 @@ public class KafkaConfigService implements DisposableBean {
                         // Создаем топик, если его нет
                         try {
                             NewTopic newTopic = new NewTopic(topic, 1, (short) 1);
-                            CreateTopicsResult createResult = client.createTopics(Collections.singleton(newTopic));
+                            CreateTopicsResult createResult = connectionCheckClient.createTopics(Collections.singleton(newTopic));
                             createResult.all().get(5, TimeUnit.SECONDS);
                             result.setMessage("Топик " + topic + " успешно создан");
                         } catch (Exception e) {
@@ -460,29 +466,56 @@ public class KafkaConfigService implements DisposableBean {
                         }
                     }
                 }
-            } finally {
-                if (client != null && client != adminClient) {
+
+                // Если подключение успешно, сохраняем конфигурацию
+                if (result.isSuccess()) {
                     try {
-                        client.close(Duration.ofSeconds(1));
+                        // Деактивируем все существующие конфигурации
+                        kafkaConfigRepository.findAll().forEach(config -> {
+                            config.setActive(false);
+                            kafkaConfigRepository.save(config);
+                        });
+
+                        // Создаем новую конфигурацию
+                        KafkaConfig newConfig = new KafkaConfig();
+                        newConfig.setBootstrapServers(bootstrapServers);
+                        newConfig.setTopic(topic);
+                        newConfig.setUsername(username);
+                        newConfig.setPassword(password);
+                        newConfig.setActive(true);
+
+                        // Сохраняем новую конфигурацию
+                        kafkaConfigRepository.save(newConfig);
+                        log.info("Конфигурация успешно сохранена: bootstrapServers={}, topic={}", bootstrapServers, topic);
                     } catch (Exception e) {
-                        log.warn("Ошибка при закрытии временного AdminClient: {}", e.getMessage());
+                        log.error("Ошибка при сохранении конфигурации: {}", e.getMessage());
+                        result.setMessage("Подключение успешно, но не удалось сохранить конфигурацию: " + e.getMessage());
                     }
                 }
+            } catch (Exception e) {
+                log.error("Ошибка при проверке подключения: {}", e.getMessage());
+                result.setSuccess(false);
+                String errorMessage = e.getMessage();
+                if (errorMessage == null || errorMessage.isEmpty()) {
+                    errorMessage = "Проверьте правильность адреса и доступность сервера Kafka";
+                } else if (errorMessage.contains("Can't assign requested address")) {
+                    errorMessage = "Не удалось подключиться к указанному адресу. Проверьте правильность адреса и доступность сервера";
+                } else if (errorMessage.contains("Connection refused")) {
+                    errorMessage = "Соединение отклонено. Проверьте, запущен ли сервер Kafka и доступен ли указанный порт";
+                }
+                result.setMessage("Не удалось подключиться к Kafka: " + errorMessage);
+            } finally {
+                // Закрываем клиент после использования
+                if (connectionCheckClient != null) {
+                    try {
+                        connectionCheckClient.close(Duration.ofSeconds(1));
+                    } catch (Exception e) {
+                        log.warn("Ошибка при закрытии AdminClient: {}", e.getMessage());
+                    }
+                    connectionCheckClient = null;
+                }
+                isCheckingConnection = false;
             }
-        } catch (Exception e) {
-            log.error("Ошибка при проверке подключения: {}", e.getMessage());
-            result.setSuccess(false);
-            String errorMessage = e.getMessage();
-            if (errorMessage == null || errorMessage.isEmpty()) {
-                errorMessage = "Проверьте правильность адреса и доступность сервера Kafka";
-            } else if (errorMessage.contains("Can't assign requested address")) {
-                errorMessage = "Не удалось подключиться к указанному адресу. Проверьте правильность адреса и доступность сервера";
-            } else if (errorMessage.contains("Connection refused")) {
-                errorMessage = "Соединение отклонено. Проверьте, запущен ли сервер Kafka и доступен ли указанный порт";
-            }
-            result.setMessage("Не удалось подключиться к Kafka: " + errorMessage);
-        } finally {
-            closeAdminClient();
         }
 
         return result;
@@ -497,7 +530,7 @@ public class KafkaConfigService implements DisposableBean {
             try {
                 Map<String, Object> props = new HashMap<>();
                 props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapServers());
-                props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-topic-creator-" + System.currentTimeMillis());
+                props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-topic-creator-" + UUID.randomUUID().toString());
                 props.put(SECURITY_PROTOCOL, "PLAINTEXT");
 
                 if (config.getUsername() != null && !config.getUsername().isEmpty() && 
@@ -536,9 +569,9 @@ public class KafkaConfigService implements DisposableBean {
 
             Map<String, Object> props = new HashMap<>();
             props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapServers());
-            props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-topic-lister-" + System.currentTimeMillis());
+            props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-topic-lister-" + UUID.randomUUID().toString());
             props.put(SECURITY_PROTOCOL, "PLAINTEXT");
-            props.put("request.timeout.ms", 30000); // Увеличиваем таймаут до 30 секунд
+            props.put("request.timeout.ms", 30000);
 
             if (config.getUsername() != null && !config.getUsername().isEmpty() && 
                 config.getPassword() != null && !config.getPassword().isEmpty()) {
@@ -558,7 +591,7 @@ public class KafkaConfigService implements DisposableBean {
         } catch (Exception e) {
             log.error("Ошибка при получении списка топиков: {}", e.getMessage(), e);
             throw new RuntimeException("Не удалось получить список топиков: " + e.getMessage());
-        } finally {
+            } finally {
             configLock.unlock();
         }
     }
@@ -604,7 +637,7 @@ public class KafkaConfigService implements DisposableBean {
             try {
                 Map<String, Object> props = new HashMap<>();
                 props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapServers());
-                props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-topic-info-" + System.currentTimeMillis());
+                props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-topic-info-" + UUID.randomUUID().toString());
                 props.put(SECURITY_PROTOCOL, "PLAINTEXT");
 
                 if (config.getUsername() != null && !config.getUsername().isEmpty() && 

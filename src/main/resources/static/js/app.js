@@ -1,37 +1,3 @@
-// Функция для получения информации о топике
-async function getTopicInfo(showError = true) {
-    try {
-        // Проверяем наличие настроек
-        const configResponse = await fetch('/api/kafka/config');
-        const config = await configResponse.json();
-        
-        if (!config.bootstrapServers) {
-            if (showError) {
-                showMessage('Сначала настройте подключение к Kafka');
-            }
-            return;
-        }
-        
-        const response = await fetch('/api/kafka/topic/info');
-        const data = await response.json();
-        
-        if (data.error) {
-            if (showError) {
-                showMessage(data.error);
-            }
-            return;
-        }
-        
-        document.getElementById('topicName').textContent = data.topicName;
-        document.getElementById('partitionCount').textContent = data.partitionCount;
-        document.getElementById('totalMessages').textContent = data.totalMessages;
-    } catch (error) {
-        if (showError) {
-            showMessage('Ошибка при получении информации о топике');
-        }
-    }
-}
-
 // Функция для очистки топика
 async function clearTopic() {
     const recreateBtn = document.getElementById('recreateTopicBtn');
@@ -54,9 +20,9 @@ async function clearTopic() {
         
         if (response.ok && data.success) {
             hideConfirmModal();
-            // Обновляем информацию о топике через 3 секунды без показа ошибок
+            // Обновляем список топиков через 3 секунды без показа ошибок
             setTimeout(() => {
-                getTopicInfo(false);
+                loadExistingTopics();
                 // Разблокируем кнопки и скрываем спиннер
                 recreateBtn.disabled = false;
                 confirmBtn.disabled = false;
@@ -287,7 +253,6 @@ async function stopContinuousWriting() {
         if (clearButton) clearButton.style.display = 'inline-block';
         
         stopStatusUpdates();
-        getTopicInfo();
         
         // Скрываем модальное окно подсчета метрик
         hideCalculatingMetricsModal();
@@ -485,14 +450,28 @@ function updateMetrics(metrics) {
 
 // Функции для работы с настройками Kafka
 async function saveKafkaConfig() {
-    const config = {
-        bootstrapServers: document.getElementById('kafkaBootstrapServers')?.value || '',
-        topic: document.getElementById('kafkaTopic')?.value || null,
-        username: document.getElementById('kafkaUsername')?.value || '',
-        password: document.getElementById('kafkaPassword')?.value || ''
-    };
+    const bootstrapServers = document.getElementById('kafkaBootstrapServers')?.value;
+    const topic = document.getElementById('kafkaTopic')?.value;
+    const username = document.getElementById('kafkaUsername')?.value;
+    const password = document.getElementById('kafkaPassword')?.value;
+
+    if (!bootstrapServers) {
+        showMessage('Введите адрес сервера Kafka');
+        return;
+    }
 
     try {
+        disableButtons();
+        
+        const config = {
+            bootstrapServers,
+            topic: topic || '',  // Убедимся, что топик не null
+            username,
+            password
+        };
+
+        console.log('Сохраняем конфигурацию:', config);
+
         const response = await fetch('/api/kafka/config', {
             method: 'POST',
             headers: {
@@ -501,21 +480,26 @@ async function saveKafkaConfig() {
             body: JSON.stringify(config)
         });
 
-        if (!response.ok) {
-            throw new Error('Ошибка при сохранении настроек');
-        }
-
-        showMessage('Настройки успешно сохранены', 'success');
+        const data = await response.json();
+        console.log('Ответ сервера:', data);
         
-        // Обновляем информацию о топике после сохранения настроек
-        if (config.topic) {
-            setTimeout(() => {
-                getTopicInfo();
-            }, 1000);
+        if (data.success) {
+            showMessage('Настройки успешно сохранены');
+            // Обновляем список топиков только после успешного сохранения конфигурации
+            await loadExistingTopics();
+            
+            // Восстанавливаем выбранный топик после обновления списка
+            if (topic && topicChoices) {
+                topicChoices.setChoiceByValue(topic);
+            }
+        } else {
+            showMessage(data.message || 'Ошибка при сохранении настроек', 'error');
         }
     } catch (error) {
-        console.error('Ошибка:', error);
+        console.error('Ошибка при сохранении настроек:', error);
         showMessage('Ошибка при сохранении настроек: ' + error.message, 'error');
+    } finally {
+        enableButtons();
     }
 }
 
@@ -559,7 +543,14 @@ async function testKafkaConnection() {
     const username = document.getElementById('kafkaUsername')?.value;
     const password = document.getElementById('kafkaPassword')?.value;
 
-    if (!bootstrapServers) {
+    console.log('Значения из формы:', {
+        bootstrapServers,
+        topic,
+        username,
+        password
+    });
+
+    if (!bootstrapServers || bootstrapServers.trim() === '') {
         showMessage('Введите адрес сервера Kafka', 'error');
         return;
     }
@@ -569,29 +560,32 @@ async function testKafkaConnection() {
         disableButtons();
         showMessage('Проверка подключения...', 'info');
 
+        const requestBody = {
+            bootstrapServers: bootstrapServers.trim(),
+            topic: topic ? topic.trim() : null,
+            username: username ? username.trim() : null,
+            password: password ? password.trim() : null
+        };
+
+        console.log('Отправляем запрос с данными:', requestBody);
+
         const response = await fetch('/api/kafka/check-connection', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                bootstrapServers,
-                topic,
-                username,
-                password
-            })
+            body: JSON.stringify(requestBody)
         });
 
         const result = await response.json();
+        console.log('Получен ответ:', result);
         
         if (result.success) {
             showMessage(result.message, 'success');
-            // Обновляем список топиков
-            await loadExistingTopics();
-            // Обновляем конфигурацию
+            // Сохраняем конфигурацию только если подключение успешно
             await saveKafkaConfig();
         } else {
-            showMessage(result.message, 'error');
+            showMessage(result.message || 'Ошибка при проверке подключения', 'error');
         }
     } catch (error) {
         console.error('Ошибка при проверке подключения:', error);
@@ -818,10 +812,6 @@ async function checkKafkaConnection() {
             await saveKafkaConfig();
             // Автоматически обновляем список топиков
             await loadExistingTopics();
-            // Обновляем информацию о топике, если он выбран
-            if (topic) {
-                await getTopicInfo();
-            }
         } else {
             showMessage(result.message || 'Ошибка при проверке подключения', 'error');
         }

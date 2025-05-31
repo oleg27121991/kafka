@@ -1,7 +1,7 @@
 package kafkareader.controller;
 
-import kafkareader.dto.KafkaConfigDTO;
-import kafkareader.dto.KafkaConnectionResult;
+import kafkareader.model.KafkaConfigDTO;
+import kafkareader.model.KafkaConnectionResult;
 import kafkareader.service.KafkaConfigService;
 import kafkareader.service.ContinuousLogWriter;
 import org.springframework.beans.factory.annotation.Autowired;
