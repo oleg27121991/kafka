@@ -7,8 +7,6 @@ import kafkareader.repository.KafkaConfigRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.config.SaslConfigs;
-import org.apache.kafka.common.errors.UnknownTopicOrPartitionException;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,28 +18,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.apache.kafka.common.config.SaslConfigs.SASL_JAAS_CONFIG;
-import static org.apache.kafka.common.config.SaslConfigs.SASL_MECHANISM;
-import static org.apache.kafka.common.security.auth.SecurityProtocol.PLAINTEXT;
-import static org.apache.kafka.common.security.auth.SecurityProtocol.SASL_PLAINTEXT;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
 import java.util.Optional;
 import jakarta.annotation.PostConstruct;
-import java.time.Duration;
 import java.util.UUID;
 
 @Slf4j
@@ -199,38 +186,6 @@ public class KafkaConfigService implements DisposableBean {
         }
     }
 
-    private void cleanupOldTopics(String bootstrapServers) {
-        log.info("Очистка старых топиков для bootstrap.servers={}", bootstrapServers);
-        try {
-            Properties props = new Properties();
-            props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-            props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-cleanup-" + UUID.randomUUID().toString());
-            props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
-            props.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, 60000);
-            
-            try (AdminClient client = AdminClient.create(props)) {
-                Set<String> topics = client.listTopics().names().get(30, TimeUnit.SECONDS);
-                log.info("Найдено {} топиков для очистки", topics.size());
-                
-                // Удаляем все топики, кроме системных
-                topics.stream()
-                    .filter(topic -> !topic.startsWith("__"))
-                    .forEach(topic -> {
-                        try {
-                            log.info("Удаление топика: {}", topic);
-                            client.deleteTopics(Collections.singleton(topic))
-                                .all()
-                                .get(30, TimeUnit.SECONDS);
-                        } catch (Exception e) {
-                            log.error("Ошибка при удалении топика {}: {}", topic, e.getMessage());
-                        }
-                    });
-            }
-        } catch (Exception e) {
-            log.error("Ошибка при очистке топиков: {}", e.getMessage());
-        }
-    }
-
     @Transactional
     public KafkaConnectionResult updateConfig(String bootstrapServers, String topic, String username, String password) {
         configLock.lock();
@@ -318,12 +273,8 @@ public class KafkaConfigService implements DisposableBean {
                         log.info("Топик {} существует: партиций={}, внутренний={}", 
                             topic, topicDescription.partitions().size(), topicDescription.isInternal());
                     } catch (ExecutionException e) {
-                        if (e.getCause() instanceof UnknownTopicOrPartitionException) {
-                            log.info("Топик {} не существует, создаем...", topic);
-                            createTopic(topic, 32, (short)1);
-                        } else {
-                            throw e;
-                        }
+                        log.info("Топик {} не существует", topic);
+                        throw e;
                     }
                 }
                 
@@ -521,42 +472,6 @@ public class KafkaConfigService implements DisposableBean {
         return result;
     }
 
-    public void createTopic(String topicName, int partitions, short replicationFactor) {
-        configLock.lock();
-        try {
-            KafkaConfig config = kafkaConfigRepository.findByActiveTrue()
-                .orElseThrow(() -> new RuntimeException("Активная конфигурация не найдена"));
-
-            try {
-                Map<String, Object> props = new HashMap<>();
-                props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapServers());
-                props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-topic-creator-" + UUID.randomUUID().toString());
-                props.put(SECURITY_PROTOCOL, "PLAINTEXT");
-
-                if (config.getUsername() != null && !config.getUsername().isEmpty() && 
-                    config.getPassword() != null && !config.getPassword().isEmpty()) {
-                    props.put(SECURITY_PROTOCOL, "SASL_PLAINTEXT");
-                    props.put(SASL_MECHANISM, "PLAIN");
-                    props.put(SASL_JAAS_CONFIG, 
-                        String.format("org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";", 
-                            config.getUsername(), config.getPassword()));
-                }
-
-                try (AdminClient client = AdminClient.create(props)) {
-                    NewTopic newTopic = new NewTopic(topicName, partitions, replicationFactor);
-                    CreateTopicsResult result = client.createTopics(Collections.singleton(newTopic));
-                    result.all().get(30, TimeUnit.SECONDS);
-                    log.info("Топик {} успешно создан", topicName);
-                }
-            } catch (Exception e) {
-                log.error("Ошибка при создании топика {}: {}", topicName, e.getMessage());
-                throw new RuntimeException("Не удалось создать топик: " + e.getMessage());
-            }
-        } finally {
-            configLock.unlock();
-        }
-    }
-
     public Set<String> listTopics() {
         configLock.lock();
         try {
@@ -626,64 +541,5 @@ public class KafkaConfigService implements DisposableBean {
             .orElse(null);
         log.debug("Получен password из БД: {}", password != null ? "***" : null);
         return password;
-    }
-
-    public Map<String, Object> getTopicInfo(String topicName) {
-        configLock.lock();
-        try {
-            KafkaConfig config = kafkaConfigRepository.findByActiveTrue()
-                .orElseThrow(() -> new RuntimeException("Активная конфигурация не найдена"));
-
-            try {
-                Map<String, Object> props = new HashMap<>();
-                props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapServers());
-                props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-topic-info-" + UUID.randomUUID().toString());
-                props.put(SECURITY_PROTOCOL, "PLAINTEXT");
-
-                if (config.getUsername() != null && !config.getUsername().isEmpty() && 
-                    config.getPassword() != null && !config.getPassword().isEmpty()) {
-                    props.put(SECURITY_PROTOCOL, "SASL_PLAINTEXT");
-                    props.put(SASL_MECHANISM, "PLAIN");
-                    props.put(SASL_JAAS_CONFIG, 
-                        String.format("org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";", 
-                            config.getUsername(), config.getPassword()));
-                }
-
-                try (AdminClient client = AdminClient.create(props)) {
-                    Map<String, TopicDescription> descriptions = client.describeTopics(Collections.singleton(topicName))
-                        .all()
-                        .get(30, TimeUnit.SECONDS);
-
-                    TopicDescription description = descriptions.get(topicName);
-                    Map<String, Object> topicInfo = new HashMap<>();
-                    topicInfo.put("name", description.name());
-                    topicInfo.put("internal", description.isInternal());
-                    topicInfo.put("partitions", description.partitions().size());
-                    
-                    // Добавляем информацию о партициях
-                    List<Map<String, Object>> partitionsInfo = new ArrayList<>();
-                    for (org.apache.kafka.common.TopicPartitionInfo partition : description.partitions()) {
-                        Map<String, Object> partitionInfo = new HashMap<>();
-                        partitionInfo.put("partition", partition.partition());
-                        partitionInfo.put("leader", partition.leader() != null ? partition.leader().id() : -1);
-                        partitionInfo.put("replicas", partition.replicas().stream()
-                            .map(node -> node.id())
-                            .collect(Collectors.toList()));
-                        partitionInfo.put("isr", partition.isr().stream()
-                            .map(node -> node.id())
-                            .collect(Collectors.toList()));
-                        partitionsInfo.add(partitionInfo);
-                    }
-                    topicInfo.put("partitionsInfo", partitionsInfo);
-
-                    return topicInfo;
-                }
-            } catch (Exception e) {
-                log.error("Ошибка при получении информации о топике {}: {}", topicName, e.getMessage());
-                throw new RuntimeException("Не удалось получить информацию о топике: " + e.getMessage());
-            }
-        } finally {
-            configLock.unlock();
-        }
     }
 } 

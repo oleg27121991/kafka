@@ -1,7 +1,6 @@
 package kafkareader.controller;
 
 import kafkareader.service.ContinuousLogWriter;
-import kafkareader.service.KafkaConfigService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,7 +13,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ContinuousWriterController {
     private final ContinuousLogWriter continuousLogWriter;
-    private final KafkaConfigService kafkaConfigService;
 
     @PostMapping("/start")
     public ResponseEntity<?> startWriting(
