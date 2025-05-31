@@ -3,108 +3,100 @@ package kafkareader.controller;
 import kafkareader.dto.KafkaConfigDTO;
 import kafkareader.dto.KafkaConnectionResult;
 import kafkareader.service.KafkaConfigService;
+import kafkareader.service.ContinuousLogWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import java.util.HashMap;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Map;
-import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/kafka")
-@RequiredArgsConstructor
 public class KafkaConfigController {
 
-    private static final Logger log = LoggerFactory.getLogger(KafkaConfigController.class);
+    @Autowired
+    private KafkaConfigService kafkaConfigService;
 
-    private final KafkaConfigService kafkaConfigService;
-
-    @GetMapping("/config")
-    public ResponseEntity<KafkaConfigDTO> getConfig() {
-        KafkaConfigDTO config = new KafkaConfigDTO();
-        config.setBootstrapServers(kafkaConfigService.getBootstrapServers());
-        config.setTopic(kafkaConfigService.getTopic());
-        config.setUsername(kafkaConfigService.getUsername());
-        config.setPassword(kafkaConfigService.getPassword());
-        return ResponseEntity.ok(config);
-    }
-
-    @PostMapping("/config")
-    public ResponseEntity<KafkaConfigDTO> updateConfig(@RequestBody KafkaConfigDTO config) {
-        kafkaConfigService.updateConfig(config);
-        return getConfig();
-    }
+    @Autowired
+    private ContinuousLogWriter continuousLogWriter;
 
     @PostMapping("/check-connection")
-    public ResponseEntity<KafkaConnectionResult> checkConnection(@RequestBody KafkaConfigDTO config) {
-        KafkaConnectionResult result = kafkaConfigService.checkConnection(
-            config.getBootstrapServers(),
-            config.getTopic(),
-            config.getUsername(),
-            config.getPassword()
-        );
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/topic/info")
-    public ResponseEntity<Map<String, Object>> getTopicInfo() {
+    public ResponseEntity<?> checkConnection(@RequestBody KafkaConfigDTO config) {
         try {
-            String topic = kafkaConfigService.getTopic();
-            if (topic == null || topic.isEmpty()) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "Топик не выбран");
-                return ResponseEntity.ok(response);
-            }
-
-            Map<String, Object> topicInfo = kafkaConfigService.getTopicInfo(topic);
-            return ResponseEntity.ok(topicInfo);
+            KafkaConnectionResult result = kafkaConfigService.checkConnection(
+                config.getBootstrapServers(),
+                config.getTopic(),
+                config.getUsername(),
+                config.getPassword()
+            );
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            log.error("Ошибка при получении информации о топике:", e);
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("error", "Ошибка при получении информации о топике: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 
-    @PostMapping("/topic/create")
-    public ResponseEntity<Map<String, Object>> createTopic(
-            @RequestParam String topicName,
-            @RequestParam(defaultValue = "1") int partitions,
-            @RequestParam(defaultValue = "1") short replicationFactor) {
+    @PostMapping("/config")
+    public ResponseEntity<?> updateConfig(@RequestBody KafkaConfigDTO config) {
         try {
-            kafkaConfigService.createTopic(topicName, partitions, replicationFactor);
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Топик успешно создан");
-            return ResponseEntity.ok(response);
+            kafkaConfigService.updateConfig(config);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Конфигурация успешно сохранена"));
         } catch (Exception e) {
-            log.error("Ошибка при создании топика:", e);
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("error", "Ошибка при создании топика: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/config")
+    public ResponseEntity<?> getConfig() {
+        try {
+            KafkaConfigDTO config = new KafkaConfigDTO();
+            config.setBootstrapServers(kafkaConfigService.getBootstrapServers());
+            config.setTopic(kafkaConfigService.getTopic());
+            config.setUsername(kafkaConfigService.getUsername());
+            config.setPassword(kafkaConfigService.getPassword());
+            return ResponseEntity.ok(config);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 
     @GetMapping("/topics")
-    public ResponseEntity<Map<String, Object>> listTopics() {
+    public ResponseEntity<?> listTopics() {
         try {
-            Set<String> topics = kafkaConfigService.listTopics();
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("topics", topics);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(Map.of("success", true, "topics", kafkaConfigService.listTopics()));
         } catch (Exception e) {
-            log.error("Ошибка при получении списка топиков:", e);
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("error", "Ошибка при получении списка топиков: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            return ResponseEntity.ok(Map.of("success", false, "error", e.getMessage(), "topics", new String[0]));
+        }
+    }
+
+    @PostMapping("/writer/start")
+    public ResponseEntity<?> startWriting(@RequestParam("file") MultipartFile file,
+                                        @RequestParam(value = "targetSpeed", defaultValue = "1000") int targetSpeed,
+                                        @RequestParam(value = "targetDataSpeed", defaultValue = "0") double targetDataSpeed) {
+        try {
+            continuousLogWriter.processFile(file, targetSpeed, targetDataSpeed);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Запись начата"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/writer/stop")
+    public ResponseEntity<?> stopWriting() {
+        try {
+            continuousLogWriter.stop();
+            return ResponseEntity.ok(Map.of("success", true, "message", "Запись остановлена"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/writer/metrics")
+    public ResponseEntity<?> getMetrics() {
+        try {
+            return ResponseEntity.ok(continuousLogWriter.getMetrics());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 } 
