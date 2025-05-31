@@ -10,8 +10,11 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Lazy
@@ -77,8 +80,49 @@ public class KafkaServiceImpl implements KafkaService {
         messagesSent = 0;
         bytesSent = 0;
 
-        // Здесь будет реализация обработки файла и отправки в Kafka
-        // TODO: Реализовать логику обработки файла
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+            String line;
+            long lastMessageTime = System.currentTimeMillis();
+            long targetInterval = (long) (1000.0 / targetSpeed); // интервал между сообщениями в мс
+
+            while (isRunning && (line = reader.readLine()) != null) {
+                if (!isRunning) {
+                    break;
+                }
+
+                // Отправка сообщения в Kafka
+                kafkaTemplate.send(currentTopic, line);
+                
+                // Обновление метрик
+                messagesSent++;
+                bytesSent += line.getBytes().length;
+
+                // Контроль скорости отправки
+                long currentTime = System.currentTimeMillis();
+                long elapsedTime = currentTime - lastMessageTime;
+                if (elapsedTime < targetInterval) {
+                    TimeUnit.MILLISECONDS.sleep(targetInterval - elapsedTime);
+                }
+                lastMessageTime = System.currentTimeMillis();
+
+                // Проверка скорости передачи данных
+                long processingTime = System.currentTimeMillis() - startTime;
+                if (processingTime > 0) {
+                    double currentDataSpeed = (bytesSent * 1000.0) / processingTime / (1024 * 1024); // МБ/с
+                    if (currentDataSpeed > targetDataSpeed) {
+                        TimeUnit.MILLISECONDS.sleep(100); // Пауза для снижения скорости
+                    }
+                }
+            }
+
+            isFileProcessed = true;
+            logger.info("Обработка файла завершена. Отправлено сообщений: {}, байт: {}", messagesSent, bytesSent);
+        } catch (Exception e) {
+            logger.error("Ошибка при обработке файла", e);
+            throw new Exception("Ошибка при обработке файла: " + e.getMessage());
+        } finally {
+            isRunning = false;
+        }
     }
 
     @Override
