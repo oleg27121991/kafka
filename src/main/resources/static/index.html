@@ -28,10 +28,6 @@
                 <i class="fas fa-chart-line"></i>
                 <span>Метрики</span>
             </a>
-            <a href="#management" class="menu-item" data-tab="management">
-                <i class="fas fa-cogs"></i>
-                <span>Управление</span>
-            </a>
         </div>
     </nav>
 
@@ -151,36 +147,9 @@
                 </div>
             </div>
         </section>
-
-        <!-- Вкладка управления -->
-        <section id="management" class="tab-content">
-            <div class="section">
-                <h2>Управление Kafka</h2>
-                <div class="kafka-controls">
-                    <button id="recreateTopicBtn" onclick="showConfirmModal()">Пересоздать топик</button>
-                    <div id="topicSpinner" class="spinner" style="display: none;"></div>
-                </div>
-                <div class="topic-info">
-                    <p>Название топика: <span id="topicName">-</span></p>
-                    <p>Количество партиций: <span id="partitionCount">-</span></p>
-                    <p>Всего сообщений: <span id="totalMessages">-</span></p>
-                </div>
-            </div>
-        </section>
     </main>
 
     <!-- Модальные окна -->
-    <div id="confirmModal" class="modal">
-        <div class="modal-content">
-            <h3>Подтверждение</h3>
-            <p>Пересоздание топика полностью удалит топик и создаст его заново. Все сообщения будут потеряны.</p>
-            <div class="modal-buttons">
-                <button class="modal-button confirm" onclick="clearTopic()">Подтвердить</button>
-                <button class="modal-button cancel" onclick="hideConfirmModal()">Отмена</button>
-            </div>
-        </div>
-    </div>
-
     <div id="messageModal" class="modal">
         <div class="modal-content">
             <h3>Сообщение</h3>

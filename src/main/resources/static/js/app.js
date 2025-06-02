@@ -1,54 +1,60 @@
-// Функция для очистки топика
-async function clearTopic() {
-    const recreateBtn = document.getElementById('recreateTopicBtn');
-    const topicSpinner = document.getElementById('topicSpinner');
-    const confirmBtn = document.querySelector('.modal-button.confirm');
-    const cancelBtn = document.querySelector('.modal-button.cancel');
-
-    try {
-        // Блокируем кнопки и показываем спиннер
-        recreateBtn.disabled = true;
-        confirmBtn.disabled = true;
-        cancelBtn.disabled = true;
-        topicSpinner.style.display = 'block';
-
-        const response = await fetch('/api/kafka/topic/clear', {
-            method: 'DELETE'
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-            hideConfirmModal();
-            // Обновляем список топиков через 3 секунды без показа ошибок
-            setTimeout(() => {
-                loadExistingTopics();
-                // Разблокируем кнопки и скрываем спиннер
-                recreateBtn.disabled = false;
-                confirmBtn.disabled = false;
-                cancelBtn.disabled = false;
-                topicSpinner.style.display = 'none';
-            }, 3000);
-        } else {
-            hideConfirmModal();
-            showMessage(data.error || 'Ошибка при пересоздании топика');
-            // Разблокируем кнопки и скрываем спиннер при ошибке
-            recreateBtn.disabled = false;
-            confirmBtn.disabled = false;
-            cancelBtn.disabled = false;
-            topicSpinner.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Ошибка при пересоздании топика:', error);
-        hideConfirmModal();
-        showMessage('Ошибка при пересоздании топика: ' + error.message);
-        // Разблокируем кнопки и скрываем спиннер при ошибке
-        recreateBtn.disabled = false;
-        confirmBtn.disabled = false;
-        cancelBtn.disabled = false;
-        topicSpinner.style.display = 'none';
+// Константы для DOM-элементов
+const DOM = {
+    elements: {
+        kafkaBootstrapServers: document.getElementById('kafkaBootstrapServers'),
+        kafkaTopic: document.getElementById('kafkaTopic'),
+        kafkaUsername: document.getElementById('kafkaUsername'),
+        kafkaPassword: document.getElementById('kafkaPassword'),
+        continuousFileInput: document.getElementById('continuousFileInput'),
+        continuousSelectedFileName: document.getElementById('continuousSelectedFileName'),
+        startContinuousBtn: document.getElementById('startContinuousBtn'),
+        stopContinuousBtn: document.getElementById('stopContinuousBtn'),
+        clearContinuousFileBtn: document.getElementById('clearContinuousFileBtn'),
+        targetSpeed: document.getElementById('targetSpeed'),
+        targetDataSpeed: document.getElementById('targetDataSpeed'),
+        continuousModal: document.getElementById('continuousModal'),
+        minimizedContinuousStatus: document.getElementById('minimizedContinuousStatus'),
+        metricsHistoryList: document.getElementById('metricsHistoryList'),
+        historyItemTemplate: document.getElementById('historyItemTemplate'),
+        selectedFileName: document.getElementById('selectedFileName'),
+        startBtn: document.getElementById('startBtn'),
+        clearFileBtn: document.getElementById('clearFileBtn'),
+        togglePasswordButton: document.querySelector('.toggle-password i')
+    },
+    buttons: {
+        saveKafkaConfig: document.getElementById('saveKafkaConfig'),
+        testKafkaConnection: document.getElementById('testKafkaConnection'),
+        refreshTopics: document.querySelector('.refresh-topics')
     }
-}
+};
+
+// Утилитные функции
+const utils = {
+    formatNumber: (num, decimals = 2) => num ? num.toFixed(decimals) : '0.00',
+    formatDataSpeed: (num) => num ? num.toFixed(4) : '0.0000',
+    updateElementText: (id, text) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = text;
+    },
+    disableButtons: (buttonIds) => {
+        buttonIds.forEach(id => {
+            const button = document.getElementById(id);
+            if (button) button.disabled = true;
+        });
+    },
+    enableButtons: (buttonIds) => {
+        buttonIds.forEach(id => {
+            const button = document.getElementById(id);
+            if (button) button.disabled = false;
+        });
+    },
+    getKafkaConfig: () => ({
+        bootstrapServers: DOM.elements.kafkaBootstrapServers?.value,
+        topic: DOM.elements.kafkaTopic?.value,
+        username: DOM.elements.kafkaUsername?.value,
+        password: DOM.elements.kafkaPassword?.value
+    })
+};
 
 // Функция для показа модального окна с сообщением
 function showMessage(message, type = 'info') {
@@ -77,16 +83,6 @@ function showMessage(message, type = 'info') {
 // Функция для закрытия модального окна с сообщением
 function hideMessageModal() {
     document.getElementById('messageModal').style.display = 'none';
-}
-
-// Функция для показа модального окна подтверждения
-function showConfirmModal() {
-    document.getElementById('confirmModal').style.display = 'flex';
-}
-
-// Функция для закрытия модального окна подтверждения
-function hideConfirmModal() {
-    document.getElementById('confirmModal').style.display = 'none';
 }
 
 // Функции для работы с непрерывной записью
@@ -126,19 +122,17 @@ document.querySelectorAll('input[name="speedType"]').forEach(radio => {
 
 function clearContinuousFile() {
     selectedContinuousFile = null;
-    document.getElementById('continuousFileInput').value = '';
-    document.getElementById('continuousSelectedFileName').textContent = '';
-    document.getElementById('startContinuousBtn').disabled = true;
-    document.getElementById('clearContinuousFileBtn').style.display = 'none';
+    DOM.elements.continuousFileInput.value = '';
+    DOM.elements.continuousSelectedFileName.textContent = '';
+    DOM.elements.startContinuousBtn.disabled = true;
+    DOM.elements.clearContinuousFileBtn.style.display = 'none';
     
-    // Сбрасываем значения полей скорости
-    document.getElementById('targetSpeed').value = '1000';
-    document.getElementById('targetDataSpeed').value = '1';
+    DOM.elements.targetSpeed.value = '1000';
+    DOM.elements.targetDataSpeed.value = '1';
     
-    // Устанавливаем радио-кнопку "По количеству сообщений" активной
     document.querySelector('input[name="speedType"][value="messages"]').checked = true;
-    document.getElementById('targetSpeed').disabled = false;
-    document.getElementById('targetDataSpeed').disabled = true;
+    DOM.elements.targetSpeed.disabled = false;
+    DOM.elements.targetDataSpeed.disabled = true;
 }
 
 async function startContinuousWriting() {
@@ -147,26 +141,23 @@ async function startContinuousWriting() {
         return;
     }
 
-    // Сразу показываем модальное окно и меняем состояние кнопок
     showContinuousModal();
-    document.getElementById('startContinuousBtn').style.display = 'none';
-    document.getElementById('stopContinuousBtn').style.display = 'inline-block';
-    document.getElementById('stopContinuousBtn').disabled = false;
+    DOM.elements.startContinuousBtn.style.display = 'none';
+    DOM.elements.stopContinuousBtn.style.display = 'inline-block';
+    DOM.elements.stopContinuousBtn.disabled = false;
 
-    // Запускаем обновление статуса до отправки запроса
     startStatusUpdates();
 
     const formData = new FormData();
     formData.append('file', selectedContinuousFile);
     
-    // Добавляем настройки скорости в зависимости от выбранного типа
     const speedType = document.querySelector('input[name="speedType"]:checked').value;
     if (speedType === 'messages') {
-        formData.append('targetSpeed', document.getElementById('targetSpeed').value);
-        formData.append('targetDataSpeed', '0'); // Отключаем контроль по скорости передачи
+        formData.append('targetSpeed', DOM.elements.targetSpeed.value);
+        formData.append('targetDataSpeed', '0');
     } else {
-        formData.append('targetSpeed', '0'); // Отключаем контроль по количеству сообщений
-        formData.append('targetDataSpeed', document.getElementById('targetDataSpeed').value);
+        formData.append('targetSpeed', '0');
+        formData.append('targetDataSpeed', DOM.elements.targetDataSpeed.value);
     }
 
     try {
@@ -179,16 +170,14 @@ async function startContinuousWriting() {
             throw new Error('Ошибка при запуске записи');
         }
 
-        // Делаем первый запрос метрик после успешного старта
         await updateContinuousStatus();
     } catch (error) {
         console.error('Ошибка:', error);
         showMessage('Ошибка при запуске записи: ' + error.message);
-        // В случае ошибки возвращаем кнопки в исходное состояние
-        document.getElementById('startContinuousBtn').style.display = 'inline-block';
-        document.getElementById('stopContinuousBtn').style.display = 'none';
-        document.getElementById('startContinuousBtn').disabled = false;
-        document.getElementById('stopContinuousBtn').disabled = true;
+        DOM.elements.startContinuousBtn.style.display = 'inline-block';
+        DOM.elements.stopContinuousBtn.style.display = 'none';
+        DOM.elements.startContinuousBtn.disabled = false;
+        DOM.elements.stopContinuousBtn.disabled = true;
         hideContinuousModal();
         stopStatusUpdates();
     }
@@ -196,40 +185,24 @@ async function startContinuousWriting() {
 
 // Функции для работы с модальными окнами
 function showCalculatingMetricsModal() {
-    let modal = document.getElementById('calculatingMetricsModal');
-    if (!modal) {
-        // Создаем модальное окно, если его нет
-        modal = document.createElement('div');
-        modal.id = 'calculatingMetricsModal';
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <h3>Расчет метрик</h3>
-                <div class="calculating-metrics">
-                    <div class="spinner"></div>
-                    <p>Пожалуйста, подождите, идет расчет метрик...</p>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
-    modal.style.display = 'flex';
+    const modal = document.getElementById('calculatingMetricsModal');
+    const modalTitle = modal.querySelector('.modal-title');
+    
+    modalTitle.innerHTML = '<div class="d-flex align-items-center"><div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>Остановка процесса...</div>';
+    modal.style.display = 'block';
 }
 
 function hideCalculatingMetricsModal() {
     const modal = document.getElementById('calculatingMetricsModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    modal.style.display = 'none';
 }
 
 async function stopContinuousWriting() {
     try {
         showCalculatingMetricsModal();
         
-        // Сразу меняем состояние кнопок
-        document.getElementById('startContinuousBtn').style.display = 'inline-block';
-        document.getElementById('stopContinuousBtn').style.display = 'none';
+        DOM.elements.startContinuousBtn.style.display = 'inline-block';
+        DOM.elements.stopContinuousBtn.style.display = 'none';
         
         const response = await fetch('/api/writer/stop', {
             method: 'POST'
@@ -242,7 +215,6 @@ async function stopContinuousWriting() {
         const metrics = await response.json();
         console.log('Получены метрики:', metrics);
         
-        // Добавляем текущие значения в историю для расчета средних
         if (metrics.currentDataSpeed) {
             dataSpeedHistory.push(metrics.currentDataSpeed);
         }
@@ -250,7 +222,6 @@ async function stopContinuousWriting() {
             messagesHistory.push(metrics.currentSpeed);
         }
         
-        // Рассчитываем средние значения на основе собранной истории
         if (dataSpeedHistory.length > 0) {
             metrics.avgDataSpeed = dataSpeedHistory.reduce((sum, speed) => sum + speed, 0) / dataSpeedHistory.length;
         }
@@ -259,10 +230,8 @@ async function stopContinuousWriting() {
             metrics.avgSpeed = messagesHistory.reduce((sum, speed) => sum + speed, 0) / messagesHistory.length;
         }
         
-        // Добавляем запись в историю с рассчитанными средними значениями
         addToMetricsHistory(metrics);
         
-        // Очищаем историю после добавления записи
         dataSpeedHistory = [];
         messagesHistory = [];
         
@@ -270,16 +239,14 @@ async function stopContinuousWriting() {
         stopStatusUpdates();
         hideContinuousModal();
         
-        // Скрываем модальное окно подсчета метрик
         hideCalculatingMetricsModal();
     } catch (error) {
         console.error('Ошибка:', error);
         showMessage('Ошибка при остановке записи: ' + error.message);
         hideCalculatingMetricsModal();
         
-        // В случае ошибки все равно возвращаем кнопки в исходное состояние
-        document.getElementById('startContinuousBtn').style.display = 'inline-block';
-        document.getElementById('stopContinuousBtn').style.display = 'none';
+        DOM.elements.startContinuousBtn.style.display = 'inline-block';
+        DOM.elements.stopContinuousBtn.style.display = 'none';
     }
 }
 
@@ -355,27 +322,21 @@ async function updateContinuousStatus() {
 
 // Функции для работы с модальными окнами
 function showContinuousModal() {
-    const modal = document.getElementById('continuousModal');
-    modal.style.display = 'block';
+    DOM.elements.continuousModal.style.display = 'block';
 }
 
 function hideContinuousModal() {
-    document.getElementById('continuousModal').style.display = 'none';
-    document.getElementById('minimizedContinuousStatus').style.display = 'none';
+    DOM.elements.continuousModal.style.display = 'none';
+    DOM.elements.minimizedContinuousStatus.style.display = 'none';
 }
 
 function toggleMinimizeModal() {
-    const modal = document.getElementById('continuousModal');
-    const minimizedStatus = document.getElementById('minimizedContinuousStatus');
-    
-    if (modal.style.display === 'block') {
-        // Сворачиваем
-        modal.style.display = 'none';
-        minimizedStatus.style.display = 'block';
+    if (DOM.elements.continuousModal.style.display === 'block') {
+        DOM.elements.continuousModal.style.display = 'none';
+        DOM.elements.minimizedContinuousStatus.style.display = 'block';
     } else {
-        // Разворачиваем
-        modal.style.display = 'block';
-        minimizedStatus.style.display = 'none';
+        DOM.elements.continuousModal.style.display = 'block';
+        DOM.elements.minimizedContinuousStatus.style.display = 'none';
     }
 }
 
@@ -384,16 +345,17 @@ let speedChart = null;
 let dataSpeedChart = null;
 let metricsHistory = [];
 
-// Инициализация графиков
+// Оптимизированные функции для работы с графиками и метриками
 function initializeCharts() {
-    // График скорости обработки
     const speedCtx = document.getElementById('speedChart').getContext('2d');
+    const dataSpeedCtx = document.getElementById('dataSpeedChart').getContext('2d');
+
     speedChart = new Chart(speedCtx, {
         type: 'line',
         data: {
             labels: [],
             datasets: [{
-                label: 'Скорость обработки (сообщений/сек)',
+                label: 'Скорость (сообщений/сек)',
                 data: [],
                 borderColor: 'rgb(75, 192, 192)',
                 tension: 0.1
@@ -401,7 +363,6 @@ function initializeCharts() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true
@@ -410,8 +371,6 @@ function initializeCharts() {
         }
     });
 
-    // График скорости передачи данных
-    const dataSpeedCtx = document.getElementById('dataSpeedChart').getContext('2d');
     dataSpeedChart = new Chart(dataSpeedCtx, {
         type: 'line',
         data: {
@@ -425,7 +384,6 @@ function initializeCharts() {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false,
             scales: {
                 y: {
                     beginAtZero: true
@@ -435,242 +393,212 @@ function initializeCharts() {
     });
 }
 
-// Обновление графиков
 function updateCharts(metrics) {
     const timestamp = new Date().toLocaleTimeString();
     
-    // Обновляем график скорости обработки
     speedChart.data.labels.push(timestamp);
-    speedChart.data.datasets[0].data.push(metrics.currentSpeed || 0);
+    speedChart.data.datasets[0].data.push(metrics.currentSpeed);
     
-    // Ограничиваем количество точек на графике
     if (speedChart.data.labels.length > 20) {
         speedChart.data.labels.shift();
         speedChart.data.datasets[0].data.shift();
     }
     
-    speedChart.update();
-
-    // Обновляем график скорости передачи данных
     dataSpeedChart.data.labels.push(timestamp);
-    dataSpeedChart.data.datasets[0].data.push(metrics.currentDataSpeed || 0);
+    dataSpeedChart.data.datasets[0].data.push(metrics.currentDataSpeed);
     
-    // Ограничиваем количество точек на графике
     if (dataSpeedChart.data.labels.length > 20) {
         dataSpeedChart.data.labels.shift();
         dataSpeedChart.data.datasets[0].data.shift();
     }
     
+    speedChart.update();
     dataSpeedChart.update();
 }
 
-// Добавление записи в историю
 function addToMetricsHistory(metrics) {
-    const historyEntry = {
-        date: new Date().toLocaleString(),
-        servers: document.getElementById('kafkaBootstrapServers').value,
-        topic: document.getElementById('kafkaTopic').value,
-        fileName: metrics.fileName || '-',
-        processingTime: (metrics.totalProcessingTimeMs / 1000).toFixed(2),
-        avgSpeed: metrics.avgSpeed ? metrics.avgSpeed.toFixed(2) : '0.00',
-        avgDataSpeed: metrics.avgDataSpeed ? metrics.avgDataSpeed.toFixed(4) : '0.0000',
-        messagesSent: metrics.messagesSent || 0,
-        fileSize: metrics.fileSizeBytes ? (metrics.fileSizeBytes / (1024 * 1024)).toFixed(2) : '0.00'
-    };
-
-    metricsHistory.unshift(historyEntry);
+    const historyList = document.getElementById('metricsHistory');
+    const template = document.getElementById('metricsHistoryTemplate');
     
-    // Ограничиваем историю последними 10 записями
-    if (metricsHistory.length > 10) {
-        metricsHistory.pop();
+    const clone = template.content.cloneNode(true);
+    
+    const totalTime = utils.formatNumber(metrics.totalTime / 1000, 2);
+    const totalMessages = utils.formatNumber(metrics.totalMessages);
+    const totalData = utils.formatNumber(metrics.totalData / (1024 * 1024), 2);
+    const avgSpeed = utils.formatNumber(metrics.avgSpeed, 2);
+    const avgDataSpeed = utils.formatNumber(metrics.avgDataSpeed, 2);
+    
+    clone.querySelector('.total-time').textContent = totalTime;
+    clone.querySelector('.total-messages').textContent = totalMessages;
+    clone.querySelector('.total-data').textContent = totalData;
+    clone.querySelector('.avg-speed').textContent = avgSpeed;
+    clone.querySelector('.avg-data-speed').textContent = avgDataSpeed;
+    
+    historyList.insertBefore(clone, historyList.firstChild);
+    
+    if (historyList.children.length > 10) {
+        historyList.removeChild(historyList.lastChild);
     }
-
-    updateMetricsHistoryList();
 }
 
-// Обновление списка истории
-function updateMetricsHistoryList() {
-    const historyList = document.getElementById('metricsHistoryList');
-    const template = document.getElementById('historyItemTemplate');
-    
-    historyList.innerHTML = '';
-
-    metricsHistory.forEach(entry => {
-        const clone = template.content.cloneNode(true);
-        
-        // Заполняем основные данные
-        clone.querySelector('.history-date').textContent = entry.date;
-        clone.querySelector('.history-servers').textContent = entry.servers;
-        clone.querySelector('.history-topic').textContent = entry.topic;
-        
-        // Заполняем детали
-        clone.querySelector('.history-file').textContent = entry.fileName;
-        clone.querySelector('.history-time').textContent = `${entry.processingTime} сек`;
-        clone.querySelector('.history-speed').textContent = `${entry.avgSpeed} сообщений/сек`;
-        clone.querySelector('.history-data-speed').textContent = `${entry.avgDataSpeed} МБ/сек`;
-        clone.querySelector('.history-messages').textContent = entry.messagesSent.toLocaleString();
-        clone.querySelector('.history-file-size').textContent = `${entry.fileSize} MB`;
-        
-        // Добавляем обработчик для раскрытия/скрытия деталей
-        const header = clone.querySelector('.history-item-header');
-        const details = clone.querySelector('.history-item-details');
-        const toggleBtn = clone.querySelector('.toggle-details');
-        
-        header.addEventListener('click', () => {
-            details.classList.toggle('active');
-            toggleBtn.classList.toggle('active');
-        });
-        
-        historyList.appendChild(clone);
-    });
-}
-
-// Обновляем функцию updateMetrics
+// Оптимизированная функция updateMetrics
 function updateMetrics(metrics) {
-    const totalTime = metrics.totalProcessingTimeMs ? (metrics.totalProcessingTimeMs / 1000).toFixed(2) : '0.00';
-    const currentSpeed = metrics.currentSpeed ? metrics.currentSpeed.toFixed(2) : '0.00';
-    const currentDataSpeed = metrics.currentDataSpeed ? metrics.currentDataSpeed.toFixed(4) : '0.0000';
-    const avgSpeed = metrics.avgSpeed ? metrics.avgSpeed.toFixed(2) : '0.00';
-    const avgDataSpeed = metrics.avgDataSpeed ? metrics.avgDataSpeed.toFixed(4) : '0.0000';
-    const totalLines = metrics.totalLinesProcessed || 0;
-    const linesWritten = metrics.linesWrittenToKafka || 0;
-    const messagesSent = metrics.messagesSent || 0;
-    const bytesSent = metrics.bytesSent || 0;
-    const fileSize = metrics.fileSizeBytes || 0;
-    const activeThreads = metrics.activeThreads || 0;
-    const isRunning = metrics.isRunning;
-    const isStopping = metrics.isStopping;
+    const {
+        totalProcessingTimeMs,
+        currentSpeed,
+        currentDataSpeed,
+        avgSpeed,
+        avgDataSpeed,
+        totalLinesProcessed,
+        linesWrittenToKafka,
+        messagesSent,
+        bytesSent,
+        fileSizeBytes,
+        activeThreads,
+        isRunning,
+        isStopping,
+        fileName
+    } = metrics;
 
-    // Функция для безопасного обновления текста элемента
-    const updateElementText = (id, text) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.textContent = text;
-        }
+    const formattedMetrics = {
+        totalTime: utils.formatNumber(totalProcessingTimeMs / 1000),
+        currentSpeed: utils.formatNumber(currentSpeed),
+        currentDataSpeed: utils.formatDataSpeed(currentDataSpeed),
+        avgSpeed: utils.formatNumber(avgSpeed),
+        avgDataSpeed: utils.formatDataSpeed(avgDataSpeed),
+        totalLines: totalLinesProcessed || 0,
+        linesWritten: linesWrittenToKafka || 0,
+        messagesSent: messagesSent || 0,
+        bytesSent: bytesSent || 0,
+        fileSize: fileSizeBytes || 0,
+        activeThreads: activeThreads || 0
     };
 
     // Обновляем текущие метрики
-    updateElementText('totalTime', totalTime);
-    updateElementText('currentSpeed', currentSpeed);
-    updateElementText('currentDataSpeed', currentDataSpeed);
-    updateElementText('kafkaLines', linesWritten.toLocaleString());
+    Object.entries({
+        totalTime: formattedMetrics.totalTime,
+        currentSpeed: formattedMetrics.currentSpeed,
+        currentDataSpeed: formattedMetrics.currentDataSpeed,
+        kafkaLines: formattedMetrics.linesWritten.toLocaleString()
+    }).forEach(([id, value]) => utils.updateElementText(id, value));
 
     // Обновляем статус в модальном окне
-    updateElementText('continuousStatus', isRunning ? 'Активна' : (isStopping ? 'Останавливается...' : 'Остановлена'));
-    updateElementText('continuousFileName', metrics.fileName || '-');
-    updateElementText('continuousMessagesSent', messagesSent.toLocaleString());
-    updateElementText('continuousSpeed', currentSpeed);
-    updateElementText('continuousDataSpeed', currentDataSpeed);
+    utils.updateElementText('continuousStatus', isRunning ? 'Активна' : (isStopping ? 'Останавливается...' : 'Остановлена'));
+    utils.updateElementText('continuousFileName', fileName || '-');
+    utils.updateElementText('continuousMessagesSent', formattedMetrics.messagesSent.toLocaleString());
+    utils.updateElementText('continuousSpeed', formattedMetrics.currentSpeed);
+    utils.updateElementText('continuousDataSpeed', formattedMetrics.currentDataSpeed);
 
     // Обновляем статус в свернутом окне
-    updateElementText('minimizedSpeed', currentSpeed);
-    updateElementText('minimizedDataSpeed', currentDataSpeed);
+    utils.updateElementText('minimizedSpeed', formattedMetrics.currentSpeed);
+    utils.updateElementText('minimizedDataSpeed', formattedMetrics.currentDataSpeed);
 
-    // Управление состоянием кнопок и элементов управления
-    const stopButton = document.getElementById('stopContinuousBtn');
-    const startButton = document.getElementById('startContinuousBtn');
-    const clearButton = document.getElementById('clearContinuousFileBtn');
-    const fileInput = document.getElementById('continuousFileInput');
-    const speedInput = document.getElementById('targetSpeed');
-    const dataSpeedInput = document.getElementById('targetDataSpeed');
-    const topicInput = document.getElementById('kafkaTopic');
-    const kafkaServersInput = document.getElementById('kafkaBootstrapServers');
-    const continuousModal = document.getElementById('continuousModal');
+    updateUIState(isRunning, isStopping);
+}
+
+// Функция для обновления состояния UI
+function updateUIState(isRunning, isStopping) {
+    const elements = {
+        stopButton: DOM.elements.stopContinuousBtn,
+        startButton: DOM.elements.startContinuousBtn,
+        clearButton: DOM.elements.clearContinuousFileBtn,
+        fileInput: DOM.elements.continuousFileInput,
+        speedInput: DOM.elements.targetSpeed,
+        dataSpeedInput: DOM.elements.targetDataSpeed,
+        topicInput: DOM.elements.kafkaTopic,
+        kafkaServersInput: DOM.elements.kafkaBootstrapServers,
+        continuousModal: DOM.elements.continuousModal
+    };
+
+    const modalElements = elements.continuousModal ? {
+        title: elements.continuousModal.querySelector('h3'),
+        body: elements.continuousModal.querySelector('.continuous-stats'),
+        footer: elements.continuousModal.querySelector('.modal-buttons')
+    } : null;
 
     if (isStopping) {
-        if (stopButton) stopButton.disabled = true;
-        if (startButton) startButton.disabled = true;
-        if (clearButton) clearButton.disabled = true;
-        if (fileInput) fileInput.disabled = true;
-        if (speedInput) speedInput.disabled = true;
-        if (dataSpeedInput) dataSpeedInput.disabled = true;
-        if (topicInput) topicInput.disabled = true;
-        if (kafkaServersInput) kafkaServersInput.disabled = true;
-        
-        // Показываем лоадер и сообщение об остановке
-        if (continuousModal) {
-            const modalTitle = continuousModal.querySelector('h3');
-            const modalBody = continuousModal.querySelector('.continuous-stats');
-            const modalFooter = continuousModal.querySelector('.modal-buttons');
-            
-            if (modalTitle) {
-                modalTitle.innerHTML = '<div class="d-flex align-items-center"><div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>Остановка процесса...</div>';
-            }
-            if (modalBody) modalBody.style.opacity = '0.5';
-            if (modalFooter) modalFooter.style.display = 'flex';
+        Object.values(elements).forEach(el => el && (el.disabled = true));
+        if (modalElements) {
+            modalElements.title.innerHTML = '<div class="d-flex align-items-center"><div class="spinner-border spinner-border-sm text-primary me-2" role="status"></div>Остановка процесса...</div>';
+            modalElements.body.style.opacity = '0.5';
         }
     } else if (isRunning) {
-        if (stopButton) stopButton.disabled = false;
-        if (startButton) startButton.disabled = true;
-        if (clearButton) clearButton.disabled = true;
-        if (fileInput) fileInput.disabled = true;
-        if (speedInput) speedInput.disabled = true;
-        if (dataSpeedInput) dataSpeedInput.disabled = true;
-        if (topicInput) topicInput.disabled = true;
-        if (kafkaServersInput) kafkaServersInput.disabled = true;
+        elements.stopButton && (elements.stopButton.disabled = false);
+        elements.startButton && (elements.startButton.disabled = true);
+        elements.clearButton && (elements.clearButton.disabled = true);
+        elements.fileInput && (elements.fileInput.disabled = true);
+        elements.speedInput && (elements.speedInput.disabled = true);
+        elements.dataSpeedInput && (elements.dataSpeedInput.disabled = true);
+        elements.topicInput && (elements.topicInput.disabled = true);
+        elements.kafkaServersInput && (elements.kafkaServersInput.disabled = true);
         
-        // Восстанавливаем нормальный вид модального окна
-        if (continuousModal) {
-            const modalTitle = continuousModal.querySelector('h3');
-            const modalBody = continuousModal.querySelector('.continuous-stats');
-            const modalFooter = continuousModal.querySelector('.modal-buttons');
-            
-            if (modalTitle) modalTitle.textContent = 'Статус записи';
-            if (modalBody) modalBody.style.opacity = '1';
-            if (modalFooter) modalFooter.style.display = 'flex';
+        if (modalElements) {
+            modalElements.title.textContent = 'Статус записи';
+            modalElements.body.style.opacity = '1';
         }
     } else {
-        if (stopButton) stopButton.disabled = true;
-        if (startButton) startButton.disabled = false;
-        if (clearButton) clearButton.disabled = false;
-        if (fileInput) fileInput.disabled = false;
-        if (speedInput) speedInput.disabled = false;
-        if (dataSpeedInput) dataSpeedInput.disabled = false;
-        if (topicInput) topicInput.disabled = false;
-        if (kafkaServersInput) kafkaServersInput.disabled = false;
+        elements.stopButton && (elements.stopButton.disabled = true);
+        elements.startButton && (elements.startButton.disabled = false);
+        elements.clearButton && (elements.clearButton.disabled = false);
+        elements.fileInput && (elements.fileInput.disabled = false);
+        elements.speedInput && (elements.speedInput.disabled = false);
+        elements.dataSpeedInput && (elements.dataSpeedInput.disabled = false);
+        elements.topicInput && (elements.topicInput.disabled = false);
+        elements.kafkaServersInput && (elements.kafkaServersInput.disabled = false);
         
-        // Восстанавливаем нормальный вид модального окна
-        if (continuousModal) {
-            const modalTitle = continuousModal.querySelector('h3');
-            const modalBody = continuousModal.querySelector('.continuous-stats');
-            const modalFooter = continuousModal.querySelector('.modal-buttons');
-            
-            if (modalTitle) modalTitle.textContent = 'Статус записи';
-            if (modalBody) modalBody.style.opacity = '1';
-            if (modalFooter) modalFooter.style.display = 'flex';
+        if (modalElements) {
+            modalElements.title.textContent = 'Статус записи';
+            modalElements.body.style.opacity = '1';
         }
     }
 }
 
-// Функции для работы с настройками Kafka
-async function saveKafkaConfig() {
-    const bootstrapServers = document.getElementById('kafkaBootstrapServers')?.value;
-    const topic = document.getElementById('kafkaTopic')?.value;
-    const username = document.getElementById('kafkaUsername')?.value;
-    const password = document.getElementById('kafkaPassword')?.value;
+// Оптимизированные функции для работы с файлами
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-    if (!bootstrapServers) {
+    selectedFile = file;
+    DOM.elements.selectedFileName.textContent = file.name;
+    DOM.elements.startBtn.disabled = false;
+    DOM.elements.clearFileBtn.style.display = 'inline-block';
+}
+
+function clearFile() {
+    selectedFile = null;
+    DOM.elements.fileInput.value = '';
+    DOM.elements.selectedFileName.textContent = '';
+    DOM.elements.startBtn.disabled = true;
+    DOM.elements.clearFileBtn.style.display = 'none';
+}
+
+function handleContinuousFileSelect(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    selectedContinuousFile = file;
+    DOM.elements.continuousSelectedFileName.textContent = file.name;
+    DOM.elements.startContinuousBtn.disabled = false;
+    DOM.elements.clearContinuousFileBtn.style.display = 'inline-block';
+}
+
+// Оптимизированные функции для работы с Kafka
+async function saveKafkaConfig() {
+    const config = utils.getKafkaConfig();
+
+    if (!config.bootstrapServers) {
         showMessage('Введите адрес сервера Kafka');
         return;
     }
 
     try {
-        disableButtons();
+        utils.disableButtons(['testKafkaConnection', 'saveKafkaConfig', 'startContinuousBtn', 'stopContinuousBtn']);
         
-        const config = {
-            bootstrapServers,
-            topic: topic || '',  // Убедимся, что топик не null
-            username,
-            password
-        };
-
         console.log('Сохраняем конфигурацию:', config);
 
         const response = await fetch('/api/kafka/config', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(config)
         });
 
@@ -679,12 +607,10 @@ async function saveKafkaConfig() {
         
         if (data.success) {
             showMessage('Настройки успешно сохранены');
-            // Обновляем список топиков только после успешного сохранения конфигурации
             await loadExistingTopics();
             
-            // Восстанавливаем выбранный топик после обновления списка
-            if (topic && topicChoices) {
-                topicChoices.setChoiceByValue(topic);
+            if (config.topic && topicChoices) {
+                topicChoices.setChoiceByValue(config.topic);
             }
         } else {
             showMessage(data.message || 'Ошибка при сохранении настроек', 'error');
@@ -693,81 +619,34 @@ async function saveKafkaConfig() {
         console.error('Ошибка при сохранении настроек:', error);
         showMessage('Ошибка при сохранении настроек: ' + error.message, 'error');
     } finally {
-        enableButtons();
+        utils.enableButtons(['testKafkaConnection', 'saveKafkaConfig', 'startContinuousBtn', 'stopContinuousBtn']);
     }
 }
 
-// Функция для блокировки кнопок
-function disableButtons() {
-    const buttons = [
-        'testKafkaConnection',
-        'saveKafkaConfig',
-        'startContinuousBtn',
-        'stopContinuousBtn'
-    ];
-    
-    buttons.forEach(buttonId => {
-        const button = document.getElementById(buttonId);
-        if (button) {
-            button.disabled = true;
-        }
-    });
-}
-
-// Функция для разблокировки кнопок
-function enableButtons() {
-    const buttons = [
-        'testKafkaConnection',
-        'saveKafkaConfig',
-        'startContinuousBtn',
-        'stopContinuousBtn'
-    ];
-    
-    buttons.forEach(buttonId => {
-        const button = document.getElementById(buttonId);
-        if (button) {
-            button.disabled = false;
-        }
-    });
-}
-
 async function testKafkaConnection() {
-    const bootstrapServers = document.getElementById('kafkaBootstrapServers')?.value;
-    const topic = document.getElementById('kafkaTopic')?.value;
-    const username = document.getElementById('kafkaUsername')?.value;
-    const password = document.getElementById('kafkaPassword')?.value;
+    const config = utils.getKafkaConfig();
 
-    console.log('Значения из формы:', {
-        bootstrapServers,
-        topic,
-        username,
-        password
-    });
-
-    if (!bootstrapServers || bootstrapServers.trim() === '') {
+    if (!config.bootstrapServers || config.bootstrapServers.trim() === '') {
         showMessage('Введите адрес сервера Kafka', 'error');
         return;
     }
 
     try {
-        // Блокируем кнопки перед проверкой
-        disableButtons();
+        utils.disableButtons(['testKafkaConnection', 'saveKafkaConfig', 'startContinuousBtn', 'stopContinuousBtn']);
         showMessage('Проверка подключения...', 'info');
 
         const requestBody = {
-            bootstrapServers: bootstrapServers.trim(),
-            topic: topic ? topic.trim() : null,
-            username: username ? username.trim() : null,
-            password: password ? password.trim() : null
+            bootstrapServers: config.bootstrapServers.trim(),
+            topic: config.topic ? config.topic.trim() : null,
+            username: config.username ? config.username.trim() : null,
+            password: config.password ? config.password.trim() : null
         };
 
         console.log('Отправляем запрос с данными:', requestBody);
 
         const response = await fetch('/api/kafka/check-connection', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
         });
 
@@ -776,7 +655,6 @@ async function testKafkaConnection() {
         
         if (result.success) {
             showMessage(result.message, 'success');
-            // Сохраняем конфигурацию только если подключение успешно
             await saveKafkaConfig();
         } else {
             showMessage(result.message || 'Ошибка при проверке подключения', 'error');
@@ -785,12 +663,10 @@ async function testKafkaConnection() {
         console.error('Ошибка при проверке подключения:', error);
         showMessage('Ошибка при проверке подключения: ' + error.message, 'error');
     } finally {
-        // Разблокируем кнопки после завершения проверки
-        enableButtons();
+        utils.enableButtons(['testKafkaConnection', 'saveKafkaConfig', 'startContinuousBtn', 'stopContinuousBtn']);
     }
 }
 
-// Загрузка текущих настроек при старте
 async function loadKafkaConfig() {
     try {
         const response = await fetch('/api/kafka/config');
@@ -800,12 +676,11 @@ async function loadKafkaConfig() {
 
         const config = await response.json();
         
-        document.getElementById('kafkaBootstrapServers').value = config.bootstrapServers || '';
-        document.getElementById('kafkaTopic').value = config.topic || '';
-        document.getElementById('kafkaUsername').value = config.username || '';
-        document.getElementById('kafkaPassword').value = config.password || '';
+        DOM.elements.kafkaBootstrapServers.value = config.bootstrapServers || '';
+        DOM.elements.kafkaTopic.value = config.topic || '';
+        DOM.elements.kafkaUsername.value = config.username || '';
+        DOM.elements.kafkaPassword.value = config.password || '';
         
-        // Загружаем список существующих топиков только если есть bootstrap servers
         if (config.bootstrapServers) {
             await loadExistingTopics();
         }
@@ -911,13 +786,12 @@ if (document.readyState === 'loading') {
 }
 
 async function loadExistingTopics() {
-    const refreshButton = document.querySelector('.refresh-topics');
-    if (!refreshButton) {
+    if (!DOM.buttons.refreshTopics) {
         console.error('Кнопка обновления топиков не найдена');
         return;
     }
     
-    refreshButton.classList.add('rotating');
+    DOM.buttons.refreshTopics.classList.add('rotating');
     
     try {
         const response = await fetch('/api/kafka/topics');
@@ -935,32 +809,27 @@ async function loadExistingTopics() {
         const topics = data.topics;
         console.log('Список топиков:', topics);
 
-        // Очищаем текущие опции
-        const topicSelect = document.getElementById('kafkaTopic');
-        if (!topicSelect) {
+        if (!DOM.elements.kafkaTopic) {
             console.error('Элемент выбора топика не найден');
             return;
         }
         
-        topicSelect.innerHTML = '';
+        DOM.elements.kafkaTopic.innerHTML = '';
         
-        // Добавляем пустую опцию
         const emptyOption = document.createElement('option');
         emptyOption.value = '';
         emptyOption.textContent = 'Выберите топик';
-        topicSelect.appendChild(emptyOption);
+        DOM.elements.kafkaTopic.appendChild(emptyOption);
         
-        // Добавляем топики, если они есть
         if (Array.isArray(topics) && topics.length > 0) {
             topics.forEach(topic => {
                 const option = document.createElement('option');
                 option.value = topic;
                 option.textContent = topic;
-                topicSelect.appendChild(option);
+                DOM.elements.kafkaTopic.appendChild(option);
             });
         }
 
-        // Обновляем Choices.js
         if (topicChoices) {
             topicChoices.destroy();
         }
@@ -969,7 +838,7 @@ async function loadExistingTopics() {
         console.error('Ошибка при загрузке топиков:', error);
         showMessage('Ошибка при загрузке топиков: ' + error.message, 'error');
     } finally {
-        refreshButton.classList.remove('rotating');
+        DOM.buttons.refreshTopics.classList.remove('rotating');
     }
 }
 
@@ -1016,16 +885,8 @@ async function checkKafkaConnection() {
 }
 
 function togglePassword() {
-    const passwordInput = document.getElementById('kafkaPassword');
-    const toggleButton = document.querySelector('.toggle-password i');
-    
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleButton.classList.remove('fa-eye');
-        toggleButton.classList.add('fa-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        toggleButton.classList.remove('fa-eye-slash');
-        toggleButton.classList.add('fa-eye');
-    }
+    const type = DOM.elements.kafkaPassword.type === 'password' ? 'text' : 'password';
+    DOM.elements.kafkaPassword.type = type;
+    DOM.elements.togglePasswordButton.classList.toggle('fa-eye');
+    DOM.elements.togglePasswordButton.classList.toggle('fa-eye-slash');
 } 

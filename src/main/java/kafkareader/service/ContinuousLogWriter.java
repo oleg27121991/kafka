@@ -190,7 +190,7 @@ public class ContinuousLogWriter {
                                         // Если превышаем целевую скорость, делаем паузу
                                         if ((targetSpeed > 0 && currentSpeed > targetSpeed) || 
                                             (targetDataSpeed > 0 && currentDataSpeed > targetDataSpeed)) {
-                                            Thread.sleep(10); // Пауза 10мс
+                                            Thread.sleep(10);
                                         }
                                     }
                                 }
