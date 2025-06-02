@@ -264,13 +264,13 @@ input[type="file"] {
     background-color: rgb(6, 41, 94);
 }
 
-#continuousSelectedFileName {
+#selectedFileName {
     margin-top: 10px;
     color: #64748b;
     font-size: 14px;
 }
 
-.upload-button {
+.btn-primary {
     background-color: rgb(8, 54, 124);
     color: white;
     padding: 12px 24px;
@@ -281,8 +281,42 @@ input[type="file"] {
     transition: background-color 0.3s ease;
 }
 
-.upload-button:hover {
+.btn-primary:hover:not(:disabled) {
     background-color: rgb(6, 41, 94);
+}
+
+.btn-primary:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0.2em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border 0.75s linear infinite;
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}
+
+.d-none {
+    display: none !important;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .metrics-section {
@@ -1370,4 +1404,143 @@ button:disabled {
     .details-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Стили для секции загрузки файла */
+.card {
+    background-color: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 96%;
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: #fff;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: rgb(8, 54, 124);
+    box-shadow: 0 0 0 2px rgba(8, 54, 124, 0.1);
+}
+
+.form-control::placeholder {
+    color: #94a3b8;
+}
+
+.upload-section {
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 2px dashed #3498db;
+    border-radius: 8px;
+    text-align: center;
+    background-color: #f8fafc;
+}
+
+.file-input-label {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: rgb(8, 54, 124);
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    margin-bottom: 15px;
+}
+
+.file-input-label:hover {
+    background-color: rgb(6, 41, 94);
+}
+
+#selectedFileName {
+    margin-top: 10px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.btn-primary {
+    background-color: rgb(8, 54, 124);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: rgb(6, 41, 94);
+}
+
+.btn-primary:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0.2em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spinner-border 0.75s linear infinite;
+}
+
+@keyframes spinner-border {
+    to { transform: rotate(360deg); }
+}
+
+.d-none {
+    display: none !important;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-secondary:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
 }

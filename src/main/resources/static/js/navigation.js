@@ -7,41 +7,49 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebar: document.querySelector('.sidebar'),
             mainContent: document.querySelector('.main-content'),
             sidebarToggle: document.querySelector('.sidebar-toggle'),
-            menuItems: document.querySelectorAll('.menu-item')
+            menuItems: document.querySelectorAll('.menu-item'),
+            tabContents: document.querySelectorAll('.tab-content')
         }
     };
 
     // Функция для переключения вкладок
     function switchTab(tabId) {
-        console.log('Switching to tab:', tabId); // Отладочное сообщение
-
-        const menuItem = document.querySelector(`[data-tab="${tabId}"]`);
-        const tabContent = document.getElementById(tabId);
-        
-        if (!menuItem || !tabContent) return;
-        
-        DOM.elements.menuItems.forEach(item => {
-            item.classList.remove('active');
-        });
-        
-        document.querySelectorAll('.tab-content').forEach(content => {
+        // Сначала скрываем все вкладки
+        DOM.elements.tabContents.forEach(content => {
+            content.style.display = 'none';
             content.classList.remove('active');
         });
-        
-        menuItem.classList.add('active');
-        tabContent.classList.add('active');
-        
+
+        // Затем показываем нужную вкладку
+        const tabContent = document.getElementById(tabId);
+        if (tabContent) {
+            tabContent.style.display = 'block';
+            tabContent.classList.add('active');
+        }
+
+        // Обновляем активный пункт меню
+        DOM.elements.menuItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('data-tab') === tabId) {
+                item.classList.add('active');
+            }
+        });
+
+        // Обновляем хэш в URL
         window.location.hash = tabId;
     }
 
     function initializeNavigation() {
+        // Обработчики для пунктов меню
         DOM.elements.menuItems.forEach(item => {
-            item.addEventListener('click', function() {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
                 const tabId = this.getAttribute('data-tab');
                 switchTab(tabId);
             });
         });
-        
+
+        // Обработчик для кнопки сворачивания меню
         DOM.elements.sidebarToggle.addEventListener('click', function() {
             console.log('Sidebar toggle clicked'); // Отладочное сообщение
             DOM.elements.sidebar.classList.toggle('collapsed');
@@ -51,9 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
             icon.classList.toggle('fa-chevron-left');
             icon.classList.toggle('fa-chevron-right');
         });
-        
+
+        // Инициализация начальной вкладки
         const hash = window.location.hash.slice(1);
-        if (hash) {
+        if (hash && document.getElementById(hash)) {
             switchTab(hash);
         } else {
             const firstTab = document.querySelector('.menu-item');
@@ -70,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('hashchange', function() {
         const hash = window.location.hash.slice(1);
         console.log('Hash changed to:', hash); // Отладочное сообщение
-        if (hash) {
+        if (hash && document.getElementById(hash)) {
             switchTab(hash);
         }
     });

@@ -199,10 +199,17 @@ function hideCalculatingMetricsModal() {
 
 async function stopContinuousWriting() {
     try {
-        showCalculatingMetricsModal();
+        const calculatingMetricsModal = document.getElementById('calculatingMetricsModal');
+        if (calculatingMetricsModal) {
+            calculatingMetricsModal.style.display = 'block';
+        }
         
-        DOM.elements.startContinuousBtn.style.display = 'inline-block';
-        DOM.elements.stopContinuousBtn.style.display = 'none';
+        if (DOM.elements.startContinuousBtn) {
+            DOM.elements.startContinuousBtn.style.display = 'inline-block';
+        }
+        if (DOM.elements.stopContinuousBtn) {
+            DOM.elements.stopContinuousBtn.style.display = 'none';
+        }
         
         const response = await fetch('/api/writer/stop', {
             method: 'POST'
@@ -239,14 +246,24 @@ async function stopContinuousWriting() {
         stopStatusUpdates();
         hideContinuousModal();
         
-        hideCalculatingMetricsModal();
+        if (calculatingMetricsModal) {
+            calculatingMetricsModal.style.display = 'none';
+        }
     } catch (error) {
         console.error('Ошибка:', error);
         showMessage('Ошибка при остановке записи: ' + error.message);
-        hideCalculatingMetricsModal();
         
-        DOM.elements.startContinuousBtn.style.display = 'inline-block';
-        DOM.elements.stopContinuousBtn.style.display = 'none';
+        const calculatingMetricsModal = document.getElementById('calculatingMetricsModal');
+        if (calculatingMetricsModal) {
+            calculatingMetricsModal.style.display = 'none';
+        }
+        
+        if (DOM.elements.startContinuousBtn) {
+            DOM.elements.startContinuousBtn.style.display = 'inline-block';
+        }
+        if (DOM.elements.stopContinuousBtn) {
+            DOM.elements.stopContinuousBtn.style.display = 'none';
+        }
     }
 }
 
@@ -326,8 +343,22 @@ function showContinuousModal() {
 }
 
 function hideContinuousModal() {
-    DOM.elements.continuousModal.style.display = 'none';
-    DOM.elements.minimizedContinuousStatus.style.display = 'none';
+    if (DOM.elements.continuousModal) {
+        DOM.elements.continuousModal.style.display = 'none';
+    }
+    if (DOM.elements.minimizedContinuousStatus) {
+        DOM.elements.minimizedContinuousStatus.style.display = 'none';
+    }
+    
+    // Разблокируем кнопки при остановке
+    if (DOM.elements.startContinuousBtn) {
+        DOM.elements.startContinuousBtn.style.display = 'inline-block';
+        DOM.elements.startContinuousBtn.disabled = false;
+    }
+    if (DOM.elements.stopContinuousBtn) {
+        DOM.elements.stopContinuousBtn.style.display = 'none';
+        DOM.elements.stopContinuousBtn.disabled = true;
+    }
 }
 
 function toggleMinimizeModal() {
@@ -419,6 +450,11 @@ function updateCharts(metrics) {
 function addToMetricsHistory(metrics) {
     const historyList = document.getElementById('metricsHistory');
     const template = document.getElementById('metricsHistoryTemplate');
+    
+    if (!historyList || !template) {
+        console.error('Не найдены элементы для отображения истории метрик');
+        return;
+    }
     
     const clone = template.content.cloneNode(true);
     

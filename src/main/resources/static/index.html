@@ -20,6 +20,10 @@
                 <i class="fas fa-plug"></i>
                 <span>Подключение</span>
             </a>
+            <a href="#single-upload" class="menu-item" data-tab="single-upload">
+                <i class="fas fa-upload"></i>
+                <span>Загрузка файла</span>
+            </a>
             <a href="#continuous" class="menu-item" data-tab="continuous">
                 <i class="fas fa-stream"></i>
                 <span>Непрерывная запись</span>
@@ -29,12 +33,11 @@
                 <span>Метрики</span>
             </a>
         </div>
+        <!-- Кнопка сворачивания меню -->
+        <button class="sidebar-toggle" title="Свернуть/развернуть меню">
+            <i class="fas fa-chevron-left"></i>
+        </button>
     </nav>
-
-    <!-- Кнопка сворачивания меню -->
-    <button class="sidebar-toggle" title="Свернуть/развернуть меню">
-        <i class="fas fa-chevron-left"></i>
-    </button>
 
     <!-- Основной контент -->
     <main class="main-content">
@@ -74,6 +77,113 @@
                     <div class="form-actions">
                         <button id="saveKafkaConfig" onclick="saveKafkaConfig()">Сохранить настройки</button>
                         <button id="testKafkaConnection" onclick="testKafkaConnection()">Проверить подключение</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладка загрузки файла -->
+        <section id="single-upload" class="tab-content">
+            <div class="content-header">
+                <h2>Загрузка файла в Kafka</h2>
+            </div>
+
+            <div class="content-body">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label for="fileInput" class="form-label">Выберите файл для загрузки</label>
+                            <div class="upload-section">
+                                <label for="fileInput" class="file-input-label">Выбрать файл</label>
+                                <input type="file" id="fileInput" accept=".log,.txt">
+                                <div id="selectedFileName" class="mt-2"></div>
+                                <button id="clearFileBtn" class="btn btn-secondary mt-2" style="display: none;">
+                                    <i class="fas fa-times"></i> Очистить выбор
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Параметры загрузки</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="logLevelPattern" class="form-label">Шаблон уровня логирования</label>
+                                        <input type="text" class="form-control" id="logLevelPattern" placeholder="Например: (INFO|ERROR|WARN|DEBUG|TRACE)">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="batchSize" class="form-label">Размер батча</label>
+                                        <input type="number" class="form-control" id="batchSize" value="1000" min="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button id="startBtn" class="btn btn-primary" disabled>
+                                <i class="fas fa-upload"></i> Загрузить в Kafka
+                            </button>
+                            <div class="spinner-border text-primary d-none" id="processingSpinner" role="status">
+                                <span class="visually-hidden">Обработка...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Метрики загрузки -->
+                <div class="card mt-4">
+                    <div class="card-header" style="margin-left: 22px;">
+                        <h3 class="mb-0">Метрики загрузки</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="metric-card">
+                                    <h6>Всего строк</h6>
+                                    <p id="totalLines">0</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="metric-card">
+                                    <h6>Обработано</h6>
+                                    <p id="processedLines">0</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="metric-card">
+                                    <h6>Скорость</h6>
+                                    <p id="processingSpeed">0 строк/сек</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="metric-card">
+                                    <h6>Прогресс</h6>
+                                    <div class="progress">
+                                        <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Статистика по партициям -->
+                        <div class="mt-4">
+                            <h6>Статистика по партициям</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Партиция</th>
+                                            <th>Количество строк</th>
+                                            <th>Размер данных</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="partitionsStats">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -138,13 +248,44 @@
                     </div>
                 </div>
 
-                <!-- История запусков -->
+                <!-- История метрик -->
                 <div class="metrics-history">
                     <h3>История запусков</h3>
-                    <div class="history-list" id="metricsHistoryList">
-                        <!-- Записи будут добавлены динамически -->
+                    <div id="metricsHistory" class="history-list">
+                        <!-- Здесь будет история метрик -->
                     </div>
                 </div>
+
+                <!-- Шаблон для элемента истории -->
+                <template id="metricsHistoryTemplate">
+                    <div class="history-item">
+                        <div class="history-item-header">
+                            <span class="history-item-time"></span>
+                        </div>
+                        <div class="history-item-content">
+                            <div class="history-item-metric">
+                                <span class="metric-label">Общее время:</span>
+                                <span class="total-time">-</span> сек
+                            </div>
+                            <div class="history-item-metric">
+                                <span class="metric-label">Всего сообщений:</span>
+                                <span class="total-messages">-</span>
+                            </div>
+                            <div class="history-item-metric">
+                                <span class="metric-label">Объем данных:</span>
+                                <span class="total-data">-</span> МБ
+                            </div>
+                            <div class="history-item-metric">
+                                <span class="metric-label">Средняя скорость:</span>
+                                <span class="avg-speed">-</span> сообщений/сек
+                            </div>
+                            <div class="history-item-metric">
+                                <span class="metric-label">Средняя скорость передачи:</span>
+                                <span class="avg-data-speed">-</span> МБ/сек
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </div>
         </section>
     </main>
@@ -237,8 +378,9 @@
         </div>
     </template>
 
-    <script src="js/app.js"></script>
     <script src="js/navigation.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/single-upload.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>

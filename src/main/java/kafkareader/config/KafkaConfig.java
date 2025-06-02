@@ -3,6 +3,7 @@ package kafkareader.config;
 import kafkareader.service.KafkaConfigService;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -172,7 +173,6 @@ public class KafkaConfig {
         
         String username = kafkaConfigService.getUsername();
         String password = kafkaConfigService.getPassword();
-        
         if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
             logger.info("Настраиваем SASL аутентификацию...");
             producerProps.put("security.protocol", "SASL_PLAINTEXT");
@@ -225,6 +225,25 @@ public class KafkaConfig {
             return template;
         } catch (Exception e) {
             logger.error("Ошибка при создании KafkaTemplate: {}", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    @Bean
+    @Lazy
+    public KafkaProducer<String, String> kafkaProducer(ProducerFactory<String, String> producerFactory) {
+        logger.info("Создание KafkaProducer...");
+        if (producerFactory == null) {
+            logger.warn("ProducerFactory не создан, KafkaProducer не будет создан");
+            return null;
+        }
+
+        try {
+            KafkaProducer<String, String> producer = new KafkaProducer<>(producerFactory.getConfigurationProperties());
+            logger.info("KafkaProducer успешно создан");
+            return producer;
+        } catch (Exception e) {
+            logger.error("Ошибка при создании KafkaProducer: {}", e.getMessage(), e);
             return null;
         }
     }
