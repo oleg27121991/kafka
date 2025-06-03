@@ -485,12 +485,12 @@ function addToMetricsHistory(metrics) {
     historyItem.querySelector('.history-item-server').textContent = `Сервер: ${kafkaConfig.bootstrapServers || 'не указан'}`;
 
     // Заполняем метрики
-    const totalTime = metrics.totalProcessingTimeMs ? metrics.totalProcessingTimeMs / 1000 : 0;
-    const totalData = metrics.bytesSent ? metrics.bytesSent / (1024 * 1024) : 0;
+    const totalTime = metrics.totalProcessingTimeMs ? (metrics.totalProcessingTimeMs / 1000).toFixed(2) : '0.00';
+    const totalData = metrics.bytesSent ? (metrics.bytesSent / (1024 * 1024)).toFixed(2) : '0.00';
     
-    historyItem.querySelector('.total-time').textContent = utils.formatNumber(totalTime);
+    historyItem.querySelector('.total-time').textContent = totalTime;
     historyItem.querySelector('.total-messages').textContent = utils.formatNumber(metrics.messagesSent || 0);
-    historyItem.querySelector('.total-data').textContent = utils.formatNumber(totalData);
+    historyItem.querySelector('.total-data').textContent = totalData;
     historyItem.querySelector('.avg-speed').textContent = utils.formatNumber(metrics.avgSpeed || 0);
     historyItem.querySelector('.avg-data-speed').textContent = utils.formatNumber(metrics.avgDataSpeed || 0);
 

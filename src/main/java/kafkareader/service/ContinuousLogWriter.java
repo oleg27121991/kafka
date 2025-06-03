@@ -142,6 +142,7 @@ public class ContinuousLogWriter {
             totalLinesProcessed = 0;
             linesWrittenToKafka = 0;
             validLines.clear();
+            totalProcessingTimeMs = 0;
             
             // Читаем файл в память
             long readStartTime = System.currentTimeMillis();
@@ -168,6 +169,7 @@ public class ContinuousLogWriter {
                 long writeStartTime = System.currentTimeMillis();
                 sendDataToKafka();
                 kafkaWriteTimeMs = System.currentTimeMillis() - writeStartTime;
+                totalProcessingTimeMs = System.currentTimeMillis() - startTime.get();
                 
                 // Логирование статистики
                 if (messagesSent.get() % 100000 == 0) {
@@ -183,6 +185,7 @@ public class ContinuousLogWriter {
         } finally {
             isRunning.set(false);
             isStopping.set(false);
+            totalProcessingTimeMs = System.currentTimeMillis() - startTime.get();
         }
     }
 
@@ -229,46 +232,61 @@ public class ContinuousLogWriter {
 
         log.info("Сгруппировано {} сообщений", messageGroups.size());
 
-        // Отправляем все сообщения одним батчем
-        long startTime = System.currentTimeMillis();
-        long totalBytes = 0;
+        // Разбиваем сообщения на батчи для контроля скорости
+        int batchSize = Math.min(BATCH_SIZE, messageGroups.size());
+        List<List<String>> batches = new ArrayList<>();
+        for (int i = 0; i < messageGroups.size(); i += batchSize) {
+            batches.add(messageGroups.subList(i, Math.min(i + batchSize, messageGroups.size())));
+        }
 
-        for (String message : messageGroups) {
-            if (message != null && !message.trim().isEmpty()) {
-                try {
-                    CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(
-                        currentTopicName, 
-                        UUID.randomUUID().toString(), 
-                        message
-                    );
-                    future.whenComplete((result, ex) -> {
-                        if (ex == null) {
-                            messagesSent.incrementAndGet();
-                            bytesSent.addAndGet(message.getBytes(StandardCharsets.UTF_8).length);
-                            linesWrittenToKafka++;
-                        } else {
-                            log.error("Ошибка при отправке сообщения: {}", ex.getMessage());
-                        }
-                    });
-                    totalBytes += message.getBytes(StandardCharsets.UTF_8).length;
-                } catch (Exception e) {
-                    log.error("Ошибка при отправке сообщения: {}", e.getMessage());
+        // Отправляем батчи с контролем скорости
+        for (List<String> batch : batches) {
+            if (!isRunning.get() || isStopping.get()) {
+                break;
+            }
+
+            long batchBytes = 0;
+            for (String message : batch) {
+                if (message != null && !message.trim().isEmpty()) {
+                    batchBytes += message.getBytes(StandardCharsets.UTF_8).length;
+                }
+            }
+
+            // Отправляем сообщения из батча
+            for (String message : batch) {
+                if (message != null && !message.trim().isEmpty()) {
+                    try {
+                        // Контроль скорости перед отправкой каждого сообщения
+                        controlSpeed(message.getBytes(StandardCharsets.UTF_8).length, 1);
+
+                        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send(
+                            currentTopicName, 
+                            UUID.randomUUID().toString(), 
+                            message
+                        );
+                        future.whenComplete((result, ex) -> {
+                            if (ex == null) {
+                                messagesSent.incrementAndGet();
+                                bytesSent.addAndGet(message.getBytes(StandardCharsets.UTF_8).length);
+                                linesWrittenToKafka++;
+                            } else {
+                                log.error("Ошибка при отправке сообщения: {}", ex.getMessage());
+                            }
+                        });
+                    } catch (Exception e) {
+                        log.error("Ошибка при отправке сообщения: {}", e.getMessage());
+                    }
                 }
             }
         }
 
-        long endTime = System.currentTimeMillis();
-        double totalSeconds = (endTime - startTime) / 1000.0;
-        double mbPerSecond = (totalBytes / (1024.0 * 1024.0)) / totalSeconds;
-
-        log.info("=== Результаты отправки ===");
-        log.info("Отправлено сообщений: {}", messageGroups.size());
-        log.info("Общий объем данных: {} MB", String.format("%.2f", totalBytes / (1024.0 * 1024.0)));
-        log.info("Общее время: {} секунд", String.format("%.2f", totalSeconds));
-        log.info("Средняя скорость: {} MB/сек", String.format("%.2f", mbPerSecond));
+        // Если все сообщения обработаны, останавливаем процесс
+        if (messageGroups.size() == 0) {
+            isStopping.set(true);
+        }
     }
 
-    private void controlSpeed(long batchBytes, int batchSize) throws InterruptedException {
+    private void controlSpeed(long messageBytes, int messageCount) throws InterruptedException {
         if (targetSpeed <= 0 && targetDataSpeed <= 0) {
             return;
         }
@@ -280,23 +298,10 @@ public class ContinuousLogWriter {
             double currentSpeed = (double) messagesSent.get() / (elapsedTime / 1000.0);
             double currentDataSpeed = (double) bytesSent.get() / (elapsedTime / 1000.0) / (1024 * 1024);
             
-            // Рассчитываем необходимую задержку
-            if (targetSpeed > 0 && currentSpeed > targetSpeed) {
-                double desiredInterval = batchSize / (double) targetSpeed;
-                double actualInterval = (double) elapsedTime / 1000;
-                if (actualInterval < desiredInterval) {
-                    long sleepTime = (long) ((desiredInterval - actualInterval) * 1000);
-                    Thread.sleep(Math.min(sleepTime, 100)); // Максимальная пауза 100 мс
-                }
-            }
-            
-            if (targetDataSpeed > 0 && currentDataSpeed > targetDataSpeed) {
-                double desiredInterval = (batchBytes / (1024 * 1024)) / targetDataSpeed;
-                double actualInterval = (double) elapsedTime / 1000;
-                if (actualInterval < desiredInterval) {
-                    long sleepTime = (long) ((desiredInterval - actualInterval) * 1000);
-                    Thread.sleep(Math.min(sleepTime, 100));
-                }
+            // Если превышаем целевую скорость, делаем паузу
+            if ((targetSpeed > 0 && currentSpeed > targetSpeed) || 
+                (targetDataSpeed > 0 && currentDataSpeed > targetDataSpeed)) {
+                Thread.sleep(10); // Пауза 10мс
             }
         }
     }
@@ -341,7 +346,7 @@ public class ContinuousLogWriter {
         metrics.put("isStopping", isStopping.get());
         metrics.put("messagesSent", messagesSent.get());
         metrics.put("bytesSent", bytesSent.get());
-        metrics.put("totalProcessingTimeMs", totalProcessingTimeMs);
+        metrics.put("totalProcessingTimeMs", isRunning.get() ? System.currentTimeMillis() - startTime.get() : totalProcessingTimeMs);
         metrics.put("kafkaWriteTimeMs", kafkaWriteTimeMs);
         metrics.put("fileReadTimeMs", fileReadTimeMs);
         metrics.put("totalLinesProcessed", totalLinesProcessed);
