@@ -10,7 +10,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -43,7 +42,6 @@ public class KafkaConfigService implements DisposableBean {
     private volatile AdminClient adminClient;
     private volatile KafkaTemplate<String, String> kafkaTemplate;
     private final KafkaConfigRepository kafkaConfigRepository;
-    private ApplicationContext applicationContext;
 
     @Autowired(required = false)
     private ContinuousLogWriter continuousLogWriter;
@@ -59,11 +57,6 @@ public class KafkaConfigService implements DisposableBean {
     public KafkaConfigService(KafkaConfigRepository kafkaConfigRepository) {
         this.kafkaConfigRepository = kafkaConfigRepository;
         log.info("KafkaConfigService инициализирован");
-    }
-
-    @Autowired
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
     }
 
     @PostConstruct

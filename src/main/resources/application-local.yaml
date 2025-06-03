@@ -69,12 +69,6 @@ spring:
       security:
         protocol: PLAINTEXT
 
-# Настройки Kafka Writer
-kafka:
-  writer:
-    threads: 4  # Количество независимых потоков для записи в Kafka
-    batch-size: 10000  # Начальный размер батча для каждого потока
-
 # Отладочный вывод
 logging:
   level:

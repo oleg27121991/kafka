@@ -1353,7 +1353,7 @@ button:disabled {
 }
 
 .toggle-details:hover {
-    color: #333;
+    color: #f8f9fa;
 }
 
 .toggle-details.active {

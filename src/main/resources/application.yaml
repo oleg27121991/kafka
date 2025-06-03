@@ -58,12 +58,6 @@ spring:
       security:
         protocol: ${KAFKA_SECURITY_PROTOCOL}
 
-# Настройки Kafka Writer
-kafka:
-  writer:
-    threads: 4
-    batch-size: 10000
-
 # Отладочный вывод
 logging:
   level:

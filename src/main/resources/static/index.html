@@ -149,32 +149,132 @@
                 <template id="metricsHistoryTemplate">
                     <div class="history-item">
                         <div class="history-item-header">
-                            <span class="history-item-time"></span>
+                            <div class="history-item-main">
+                                <span class="history-item-time"></span>
+                                <span class="history-item-topic"></span>
+                                <span class="history-item-server"></span>
+                            </div>
+                            <button class="toggle-details">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
                         </div>
-                        <div class="history-item-content">
-                            <div class="history-item-metric">
-                                <span class="metric-label">Общее время:</span>
-                                <span class="total-time">-</span> сек
-                            </div>
-                            <div class="history-item-metric">
-                                <span class="metric-label">Всего сообщений:</span>
-                                <span class="total-messages">-</span>
-                            </div>
-                            <div class="history-item-metric">
-                                <span class="metric-label">Объем данных:</span>
-                                <span class="total-data">-</span> МБ
-                            </div>
-                            <div class="history-item-metric">
-                                <span class="metric-label">Средняя скорость:</span>
-                                <span class="avg-speed">-</span> сообщений/сек
-                            </div>
-                            <div class="history-item-metric">
-                                <span class="metric-label">Средняя скорость передачи:</span>
-                                <span class="avg-data-speed">-</span> МБ/сек
+                        <div class="history-item-content" style="display: none;">
+                            <div class="history-item-metrics">
+                                <div class="history-item-metric">
+                                    <span class="metric-label">Общее время:</span>
+                                    <span class="metric-value total-time">-</span>
+                                    <span class="metric-unit">сек</span>
+                                </div>
+                                <div class="history-item-metric">
+                                    <span class="metric-label">Всего сообщений:</span>
+                                    <span class="metric-value total-messages">-</span>
+                                </div>
+                                <div class="history-item-metric">
+                                    <span class="metric-label">Объем данных:</span>
+                                    <span class="metric-value total-data">-</span>
+                                    <span class="metric-unit">МБ</span>
+                                </div>
+                                <div class="history-item-metric">
+                                    <span class="metric-label">Средняя скорость:</span>
+                                    <span class="metric-value avg-speed">-</span>
+                                    <span class="metric-unit">сообщений/сек</span>
+                                </div>
+                                <div class="history-item-metric">
+                                    <span class="metric-label">Средняя скорость передачи:</span>
+                                    <span class="metric-value avg-data-speed">-</span>
+                                    <span class="metric-unit">МБ/сек</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </template>
+
+                <style>
+                    .history-item {
+                        background: #fff;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        margin-bottom: 12px;
+                        overflow: hidden;
+                    }
+
+                    .history-item-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 12px 16px;
+                        background: #f8f9fa;
+                        cursor: pointer;
+                        transition: background-color 0.2s;
+                    }
+
+                    .history-item-header:hover {
+                        background: #e9ecef;
+                    }
+
+                    .history-item-main {
+                        display: flex;
+                        gap: 16px;
+                        align-items: center;
+                    }
+
+                    .history-item-time {
+                        font-weight: 500;
+                        color: #495057;
+                    }
+
+                    .history-item-topic,
+                    .history-item-server {
+                        color: #6c757d;
+                        font-size: 0.9em;
+                    }
+
+                    .toggle-details {
+                        background: none;
+                        border: none;
+                        color: #6c757d;
+                        cursor: pointer;
+                        padding: 4px;
+                        transition: transform 0.2s;
+                    }
+
+                    .toggle-details:hover {
+                        color: #495057;
+                    }
+
+                    .history-item-content {
+                        padding: 16px;
+                        border-top: 1px solid #e9ecef;
+                    }
+
+                    .history-item-metrics {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                        gap: 16px;
+                    }
+
+                    .history-item-metric {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 4px;
+                    }
+
+                    .metric-label {
+                        color: #6c757d;
+                        font-size: 0.9em;
+                    }
+
+                    .metric-value {
+                        font-size: 1.2em;
+                        font-weight: 500;
+                        color: #212529;
+                    }
+
+                    .metric-unit {
+                        color: #6c757d;
+                        font-size: 0.9em;
+                    }
+                </style>
             </div>
         </section>
     </main>

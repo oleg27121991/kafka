@@ -97,10 +97,12 @@ document.getElementById('continuousFileInput').addEventListener('change', functi
         document.getElementById('continuousSelectedFileName').textContent = selectedContinuousFile.name;
         document.getElementById('startContinuousBtn').disabled = false;
         document.getElementById('clearContinuousFileBtn').style.display = 'inline-block';
+        saveContinuousState(); // Сохраняем состояние при выборе файла
     } else {
         document.getElementById('continuousSelectedFileName').textContent = '';
         document.getElementById('startContinuousBtn').disabled = true;
         document.getElementById('clearContinuousFileBtn').style.display = 'none';
+        saveContinuousState(); // Сохраняем состояние при очистке файла
     }
 });
 
@@ -117,8 +119,13 @@ document.querySelectorAll('input[name="speedType"]').forEach(radio => {
             targetSpeedInput.disabled = true;
             targetDataSpeedInput.disabled = false;
         }
+        saveContinuousState(); // Сохраняем состояние при изменении типа скорости
     });
 });
+
+// Обновляем обработчики для полей ввода скорости
+DOM.elements.targetSpeed.addEventListener('change', saveContinuousState);
+DOM.elements.targetDataSpeed.addEventListener('change', saveContinuousState);
 
 function clearContinuousFile() {
     selectedContinuousFile = null;
@@ -133,6 +140,8 @@ function clearContinuousFile() {
     document.querySelector('input[name="speedType"][value="messages"]').checked = true;
     DOM.elements.targetSpeed.disabled = false;
     DOM.elements.targetDataSpeed.disabled = true;
+    
+    saveContinuousState(); // Сохраняем состояние при очистке
 }
 
 async function startContinuousWriting() {
@@ -448,33 +457,48 @@ function updateCharts(metrics) {
 }
 
 function addToMetricsHistory(metrics) {
-    const historyList = document.getElementById('metricsHistory');
+    const historyContainer = document.getElementById('metricsHistory');
     const template = document.getElementById('metricsHistoryTemplate');
     
-    if (!historyList || !template) {
-        console.error('Не найдены элементы для отображения истории метрик');
+    if (!historyContainer || !template) {
+        console.error('Не найдены необходимые элементы для отображения истории метрик');
         return;
     }
+
+    const historyItem = template.content.cloneNode(true);
     
-    const clone = template.content.cloneNode(true);
+    // Устанавливаем время
+    const now = new Date();
+    historyItem.querySelector('.history-item-time').textContent = 
+        now.toLocaleString('ru-RU', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+
+    // Устанавливаем информацию о топике и сервере
+    const kafkaConfig = utils.getKafkaConfig();
+    historyItem.querySelector('.history-item-topic').textContent = `Топик: ${kafkaConfig.topic || 'не выбран'}`;
+    historyItem.querySelector('.history-item-server').textContent = `Сервер: ${kafkaConfig.bootstrapServers || 'не указан'}`;
+
+    // Заполняем метрики
+    const totalTime = metrics.totalProcessingTimeMs ? metrics.totalProcessingTimeMs / 1000 : 0;
+    const totalData = metrics.bytesSent ? metrics.bytesSent / (1024 * 1024) : 0;
     
-    const totalTime = utils.formatNumber(metrics.totalTime / 1000, 2);
-    const totalMessages = utils.formatNumber(metrics.totalMessages);
-    const totalData = utils.formatNumber(metrics.totalData / (1024 * 1024), 2);
-    const avgSpeed = utils.formatNumber(metrics.avgSpeed, 2);
-    const avgDataSpeed = utils.formatNumber(metrics.avgDataSpeed, 2);
+    historyItem.querySelector('.total-time').textContent = utils.formatNumber(totalTime);
+    historyItem.querySelector('.total-messages').textContent = utils.formatNumber(metrics.messagesSent || 0);
+    historyItem.querySelector('.total-data').textContent = utils.formatNumber(totalData);
+    historyItem.querySelector('.avg-speed').textContent = utils.formatNumber(metrics.avgSpeed || 0);
+    historyItem.querySelector('.avg-data-speed').textContent = utils.formatNumber(metrics.avgDataSpeed || 0);
+
+    // Добавляем элемент в начало списка
+    historyContainer.insertBefore(historyItem, historyContainer.firstChild);
     
-    clone.querySelector('.total-time').textContent = totalTime;
-    clone.querySelector('.total-messages').textContent = totalMessages;
-    clone.querySelector('.total-data').textContent = totalData;
-    clone.querySelector('.avg-speed').textContent = avgSpeed;
-    clone.querySelector('.avg-data-speed').textContent = avgDataSpeed;
-    
-    historyList.insertBefore(clone, historyList.firstChild);
-    
-    if (historyList.children.length > 10) {
-        historyList.removeChild(historyList.lastChild);
-    }
+    // Сохраняем историю в localStorage
+    saveMetricsHistory();
 }
 
 // Оптимизированная функция updateMetrics
@@ -719,6 +743,8 @@ async function loadKafkaConfig() {
         
         if (config.bootstrapServers) {
             await loadExistingTopics();
+            // После загрузки топиков восстанавливаем сохраненный топик
+            loadTopicState();
         }
     } catch (error) {
         console.error('Ошибка при загрузке настроек:', error);
@@ -760,18 +786,168 @@ function initializeChoices() {
                 selectedState: 'is-selected'
             }
         });
+
+        // Добавляем обработчик изменения значения
+        topicSelect.addEventListener('change', function() {
+            saveTopicState();
+        });
     }
 }
 
-// Инициализация при загрузке страницы
+// Функции для работы с историей метрик
+function saveMetricsHistory() {
+    const historyContainer = document.getElementById('metricsHistory');
+    if (!historyContainer) return;
+    
+    const historyItems = Array.from(historyContainer.children).map(item => ({
+        time: item.querySelector('.history-item-time').textContent,
+        topic: item.querySelector('.history-item-topic').textContent,
+        server: item.querySelector('.history-item-server').textContent,
+        totalTime: item.querySelector('.total-time').textContent,
+        totalMessages: item.querySelector('.total-messages').textContent,
+        totalData: item.querySelector('.total-data').textContent,
+        avgSpeed: item.querySelector('.avg-speed').textContent,
+        avgDataSpeed: item.querySelector('.avg-data-speed').textContent
+    }));
+    
+    localStorage.setItem('metricsHistory', JSON.stringify(historyItems));
+}
+
+function loadMetricsHistory() {
+    const historyContainer = document.getElementById('metricsHistory');
+    const template = document.getElementById('metricsHistoryTemplate');
+    
+    if (!historyContainer || !template) return;
+    
+    const savedHistory = localStorage.getItem('metricsHistory');
+    if (!savedHistory) return;
+    
+    try {
+        const historyItems = JSON.parse(savedHistory);
+        historyContainer.innerHTML = ''; // Очищаем контейнер
+        
+        historyItems.forEach(item => {
+            const historyItem = template.content.cloneNode(true);
+            
+            historyItem.querySelector('.history-item-time').textContent = item.time;
+            historyItem.querySelector('.history-item-topic').textContent = item.topic;
+            historyItem.querySelector('.history-item-server').textContent = item.server;
+            historyItem.querySelector('.total-time').textContent = item.totalTime;
+            historyItem.querySelector('.total-messages').textContent = item.totalMessages;
+            historyItem.querySelector('.total-data').textContent = item.totalData;
+            historyItem.querySelector('.avg-speed').textContent = item.avgSpeed;
+            historyItem.querySelector('.avg-data-speed').textContent = item.avgDataSpeed;
+            
+            historyContainer.appendChild(historyItem);
+        });
+    } catch (error) {
+        console.error('Ошибка при загрузке истории метрик:', error);
+    }
+}
+
+// Функции для работы с состоянием непрерывной записи
+function saveContinuousState() {
+    const state = {
+        targetSpeed: DOM.elements.targetSpeed.value,
+        targetDataSpeed: DOM.elements.targetDataSpeed.value,
+        speedType: document.querySelector('input[name="speedType"]:checked').value,
+        fileName: DOM.elements.continuousSelectedFileName.textContent
+    };
+    localStorage.setItem('continuousState', JSON.stringify(state));
+}
+
+function loadContinuousState() {
+    const savedState = localStorage.getItem('continuousState');
+    if (!savedState) return;
+    
+    try {
+        const state = JSON.parse(savedState);
+        
+        // Восстанавливаем значения полей скорости
+        DOM.elements.targetSpeed.value = state.targetSpeed || '1000';
+        DOM.elements.targetDataSpeed.value = state.targetDataSpeed || '1';
+        
+        // Восстанавливаем состояние радио-кнопок
+        const speedTypeRadio = document.querySelector(`input[name="speedType"][value="${state.speedType}"]`);
+        if (speedTypeRadio) {
+            speedTypeRadio.checked = true;
+            // Обновляем состояние полей ввода
+            if (state.speedType === 'messages') {
+                DOM.elements.targetSpeed.disabled = false;
+                DOM.elements.targetDataSpeed.disabled = true;
+            } else {
+                DOM.elements.targetSpeed.disabled = true;
+                DOM.elements.targetDataSpeed.disabled = false;
+            }
+        }
+        
+        // Восстанавливаем имя файла
+        if (state.fileName) {
+            DOM.elements.continuousSelectedFileName.textContent = state.fileName;
+            DOM.elements.startContinuousBtn.disabled = false;
+            DOM.elements.clearContinuousFileBtn.style.display = 'inline-block';
+        }
+    } catch (error) {
+        console.error('Ошибка при загрузке состояния непрерывной записи:', error);
+    }
+}
+
+// Функции для работы с состоянием топика
+function saveTopicState() {
+    const topic = DOM.elements.kafkaTopic.value;
+    if (topic) {
+        localStorage.setItem('selectedTopic', topic);
+    }
+}
+
+function loadTopicState() {
+    const savedTopic = localStorage.getItem('selectedTopic');
+    if (savedTopic && topicChoices) {
+        topicChoices.setChoiceByValue(savedTopic);
+    }
+}
+
+function clearLocalStorage() {
+    console.log('Очистка локальных данных...');
+    localStorage.removeItem('metricsHistory');
+    localStorage.removeItem('continuousState');
+    localStorage.removeItem('selectedTopic');
+}
+
 function initializeApp() {
     console.log('Инициализация приложения...');
     
-    // Инициализация Choices.js
+    // Очищаем локальные данные при старте
+    clearLocalStorage();
+    
+    // Инициализация Choices.js для селекта топиков
     initializeChoices();
     
-    // Загрузка конфигурации
+    // Загрузка сохраненной конфигурации
     loadKafkaConfig();
+    
+    // Загрузка истории метрик
+    loadMetricsHistory();
+    
+    // Загрузка состояния непрерывной записи
+    loadContinuousState();
+    
+    // Инициализация обработчиков событий
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.toggle-details') || e.target.closest('.history-item-header')) {
+            const historyItem = e.target.closest('.history-item');
+            const content = historyItem.querySelector('.history-item-content');
+            const icon = historyItem.querySelector('.toggle-details i');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.className = 'fas fa-chevron-down';
+            } else {
+                content.style.display = 'none';
+                icon.className = 'fas fa-chevron-right';
+            }
+        }
+    });
     
     // Добавляем обработчики событий
     const saveConfigBtn = document.getElementById('saveKafkaConfig');
@@ -870,6 +1046,9 @@ async function loadExistingTopics() {
             topicChoices.destroy();
         }
         initializeChoices();
+        
+        // После инициализации Choices.js восстанавливаем сохраненный топик
+        loadTopicState();
     } catch (error) {
         console.error('Ошибка при загрузке топиков:', error);
         showMessage('Ошибка при загрузке топиков: ' + error.message, 'error');
