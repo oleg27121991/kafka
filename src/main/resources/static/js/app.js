@@ -53,7 +53,11 @@ const utils = {
         topic: DOM.elements.kafkaTopic?.value,
         username: DOM.elements.kafkaUsername?.value,
         password: DOM.elements.kafkaPassword?.value
-    })
+    }),
+    getApiUrl: (path) => {
+        const baseUrl = window.location.origin;
+        return `${baseUrl}${path}`;
+    }
 };
 
 // Функция для показа модального окна с сообщением
@@ -170,7 +174,7 @@ async function startContinuousWriting() {
     }
 
     try {
-        const response = await fetch('/api/writer/start', {
+        const response = await fetch(utils.getApiUrl('/api/writer/start'), {
             method: 'POST',
             body: formData
         });
@@ -213,14 +217,17 @@ async function stopContinuousWriting() {
             calculatingMetricsModal.style.display = 'block';
         }
         
+        // Обновляем UI перед отправкой запроса
         if (DOM.elements.startContinuousBtn) {
             DOM.elements.startContinuousBtn.style.display = 'inline-block';
+            DOM.elements.startContinuousBtn.disabled = true;
         }
         if (DOM.elements.stopContinuousBtn) {
             DOM.elements.stopContinuousBtn.style.display = 'none';
+            DOM.elements.stopContinuousBtn.disabled = true;
         }
         
-        const response = await fetch('/api/writer/stop', {
+        const response = await fetch(utils.getApiUrl('/api/writer/stop'), {
             method: 'POST'
         });
 
@@ -248,30 +255,50 @@ async function stopContinuousWriting() {
         
         addToMetricsHistory(metrics);
         
-        dataSpeedHistory = [];
-        messagesHistory = [];
-        
-        updateMetrics(metrics);
-        stopStatusUpdates();
-        hideContinuousModal();
-        
+        // Скрываем модальные окна
         if (calculatingMetricsModal) {
             calculatingMetricsModal.style.display = 'none';
         }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showMessage('Ошибка при остановке записи: ' + error.message);
+        if (DOM.elements.continuousModal) {
+            DOM.elements.continuousModal.style.display = 'none';
+        }
+        if (DOM.elements.minimizedContinuousStatus) {
+            DOM.elements.minimizedContinuousStatus.style.display = 'none';
+        }
         
-        const calculatingMetricsModal = document.getElementById('calculatingMetricsModal');
+        stopStatusUpdates();
+        
+        // Разблокируем кнопки после остановки
+        if (DOM.elements.startContinuousBtn) {
+            DOM.elements.startContinuousBtn.disabled = false;
+        }
+        if (DOM.elements.stopContinuousBtn) {
+            DOM.elements.stopContinuousBtn.disabled = true;
+        }
+        
+        showMessage('Запись остановлена', 'success');
+    } catch (error) {
+        console.error('Ошибка при остановке записи:', error);
+        showMessage('Ошибка при остановке записи: ' + error.message, 'error');
+        
+        // В случае ошибки также скрываем модальные окна и разблокируем кнопки
         if (calculatingMetricsModal) {
             calculatingMetricsModal.style.display = 'none';
+        }
+        if (DOM.elements.continuousModal) {
+            DOM.elements.continuousModal.style.display = 'none';
+        }
+        if (DOM.elements.minimizedContinuousStatus) {
+            DOM.elements.minimizedContinuousStatus.style.display = 'none';
         }
         
         if (DOM.elements.startContinuousBtn) {
             DOM.elements.startContinuousBtn.style.display = 'inline-block';
+            DOM.elements.startContinuousBtn.disabled = false;
         }
         if (DOM.elements.stopContinuousBtn) {
             DOM.elements.stopContinuousBtn.style.display = 'none';
+            DOM.elements.stopContinuousBtn.disabled = true;
         }
     }
 }
@@ -704,7 +731,7 @@ async function testKafkaConnection() {
 
         console.log('Отправляем запрос с данными:', requestBody);
 
-        const response = await fetch('/api/kafka/check-connection', {
+        const response = await fetch(utils.getApiUrl('/api/kafka/check-connection'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
@@ -1006,7 +1033,7 @@ async function loadExistingTopics() {
     DOM.buttons.refreshTopics.classList.add('rotating');
     
     try {
-        const response = await fetch('/api/kafka/topics');
+        const response = await fetch(utils.getApiUrl('/api/kafka/topics'));
         if (!response.ok) {
             throw new Error('Ошибка при загрузке топиков');
         }
