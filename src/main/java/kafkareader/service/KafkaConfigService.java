@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.kafka.common.Node;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -29,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.Optional;
 import jakarta.annotation.PostConstruct;
 import java.util.UUID;
+import java.util.Collection;
 
 @Slf4j
 @Service
@@ -240,6 +242,9 @@ public class KafkaConfigService implements DisposableBean {
                 props.put("metadata.max.age.ms", 300000);
                 props.put("socket.connection.setup.timeout.ms", 10000);
                 props.put("socket.connection.setup.timeout.max.ms", 30000);
+                // Отключаем автоматическое обнаружение брокеров
+                props.put("discovery.enabled", "false");
+                props.put("client.rack", "");
                 
                 if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
                     log.info("Добавляем настройки безопасности...");
@@ -373,20 +378,63 @@ public class KafkaConfigService implements DisposableBean {
                 props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
                 props.put(AdminClientConfig.CLIENT_ID_CONFIG, "kafkareader-connection-check");
                 props.put(SECURITY_PROTOCOL, "PLAINTEXT");
+                props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);
+                props.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, 60000);
+                props.put(AdminClientConfig.RETRIES_CONFIG, 5);
+                props.put(AdminClientConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
+
+                // Добавляем дополнительные параметры для улучшения подключения
+                props.put("client.dns.lookup", "use_all_dns_ips");
+                props.put("reconnect.backoff.ms", 1000);
+                props.put("reconnect.backoff.max.ms", 5000);
+                props.put("connections.max.idle.ms", 540000);
+                props.put("metadata.max.age.ms", 300000);
+                props.put("socket.connection.setup.timeout.ms", 10000);
+                props.put("socket.connection.setup.timeout.max.ms", 30000);
+                // Отключаем автоматическое обнаружение брокеров
+                props.put("discovery.enabled", "false");
+                props.put("client.rack", "");
 
                 if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
+                    log.info("Добавляем настройки безопасности...");
                     props.put(SECURITY_PROTOCOL, "SASL_PLAINTEXT");
                     props.put(SASL_MECHANISM, "PLAIN");
-                    props.put(SASL_JAAS_CONFIG, 
-                        String.format("org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";", 
-                            username, password));
+                    props.put(SASL_JAAS_CONFIG, String.format(
+                        "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"%s\" password=\"%s\";",
+                        username, password
+                    ));
                 }
 
                 // Создаем новый клиент
                 connectionCheckClient = AdminClient.create(props);
                 
+                // Логируем настройки клиента
+                log.info("Создан AdminClient с настройками:");
+                props.forEach((key, value) -> {
+                    if (key.toString().contains("password")) {
+                        log.info("{} = ***", key);
+                    } else {
+                        log.info("{} = {}", key, value);
+                    }
+                });
+                
                 // Проверяем подключение с таймаутом
+                log.info("Запрашиваем список топиков...");
                 Set<String> topics = connectionCheckClient.listTopics().names().get(5, TimeUnit.SECONDS);
+                log.info("Получены топики: {}", topics);
+
+                // Получаем метаданные брокера
+                log.info("Запрашиваем метаданные брокера...");
+                DescribeClusterResult clusterResult = connectionCheckClient.describeCluster();
+                Collection<Node> nodes = clusterResult.nodes().get(5, TimeUnit.SECONDS);
+                String controllerId = clusterResult.controller().get(5, TimeUnit.SECONDS).idString();
+                log.info("Controller ID: {}", controllerId);
+                log.info("Nodes:");
+                nodes.forEach(node -> {
+                    log.info("Node ID: {}, Host: {}, Port: {}, Rack: {}", 
+                        node.idString(), node.host(), node.port(), node.rack());
+                });
+
                 result.setSuccess(true);
                 result.setMessage("Подключение к Kafka успешно установлено. Доступные топики: " + topics);
 

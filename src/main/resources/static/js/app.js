@@ -729,7 +729,10 @@ async function testKafkaConnection() {
             password: config.password ? config.password.trim() : null
         };
 
-        console.log('Отправляем запрос с данными:', requestBody);
+        console.log('Отправляем запрос с данными:', {
+            ...requestBody,
+            password: requestBody.password ? '***' : null
+        });
 
         const response = await fetch(utils.getApiUrl('/api/kafka/check-connection'), {
             method: 'POST',
@@ -737,12 +740,17 @@ async function testKafkaConnection() {
             body: JSON.stringify(requestBody)
         });
 
+        if (!response.ok) {
+            throw new Error('Ошибка при проверке подключения: ' + response.statusText);
+        }
+
         const result = await response.json();
         console.log('Получен ответ:', result);
         
         if (result.success) {
             showMessage(result.message, 'success');
-            await saveKafkaConfig();
+            // Автоматически обновляем список топиков
+            await loadExistingTopics();
         } else {
             showMessage(result.message || 'Ошибка при проверке подключения', 'error');
         }
@@ -950,9 +958,6 @@ function initializeApp() {
     // Инициализация Choices.js для селекта топиков
     initializeChoices();
     
-    // Загрузка сохраненной конфигурации
-    loadKafkaConfig();
-    
     // Загрузка истории метрик
     loadMetricsHistory();
     
@@ -1081,48 +1086,6 @@ async function loadExistingTopics() {
         showMessage('Ошибка при загрузке топиков: ' + error.message, 'error');
     } finally {
         DOM.buttons.refreshTopics.classList.remove('rotating');
-    }
-}
-
-async function checkKafkaConnection() {
-    const bootstrapServers = document.getElementById('kafkaBootstrapServers').value;
-    const topic = document.getElementById('kafkaTopic').value;
-
-    if (!bootstrapServers) {
-        showMessage('Пожалуйста, укажите адрес bootstrap servers', 'error');
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/kafka/check-connection', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                bootstrapServers: bootstrapServers,
-                topic: topic || null
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('Ошибка при проверке подключения: ' + response.statusText);
-        }
-
-        const result = await response.json();
-        
-        if (result.success) {
-            showMessage(result.message, 'success');
-            // Обновляем конфигурацию после успешной проверки
-            await saveKafkaConfig();
-            // Автоматически обновляем список топиков
-            await loadExistingTopics();
-        } else {
-            showMessage(result.message || 'Ошибка при проверке подключения', 'error');
-        }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showMessage('Ошибка при проверке подключения: ' + error.message, 'error');
     }
 }
 

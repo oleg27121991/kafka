@@ -52,6 +52,7 @@ public class KafkaConfig {
         configs.put(AdminClientConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
         configs.put(AdminClientConfig.SECURITY_PROTOCOL_CONFIG, "PLAINTEXT");
         
+        // Принудительно используем указанный bootstrap сервер
         configs.put("client.dns.lookup", "use_all_dns_ips");
         configs.put("reconnect.backoff.ms", 1000);
         configs.put("reconnect.backoff.max.ms", 5000);
@@ -59,6 +60,9 @@ public class KafkaConfig {
         configs.put("metadata.max.age.ms", 300000);
         configs.put("socket.connection.setup.timeout.ms", 10000);
         configs.put("socket.connection.setup.timeout.max.ms", 30000);
+        // Отключаем автоматическое обнаружение брокеров
+        configs.put("discovery.enabled", "false");
+        configs.put("client.rack", "");
         
         String username = kafkaConfigService.getUsername();
         String password = kafkaConfigService.getPassword();

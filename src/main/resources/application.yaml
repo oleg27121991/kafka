@@ -60,14 +60,23 @@ spring:
         enable.idempotence: false
         max.block.ms: 1000
         request.timeout.ms: 1000
+        discovery.enabled: false
+        client.rack: ""
     consumer:
       group-id: ${spring.application.name}
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        discovery.enabled: false
+        client.rack: ""
     properties:
       security:
         protocol: PLAINTEXT
+      discovery:
+        enabled: false
+      client:
+        rack: ""
 
 # Отладочный вывод
 logging:
