@@ -43,18 +43,6 @@ if ! docker buildx ls | grep -q "kafkareader-builder"; then
     docker buildx create --name kafkareader-builder --use
 fi
 
-# Сборка и публикация образа
-echo "Сборка и публикация Docker образа..."
-if ! docker buildx build --platform linux/amd64,linux/arm64 -t veremeioleg/kafkareader:latest --push .; then
-    echo "Ошибка при публикации образа. Убедитесь, что:"
-    echo "1. Репозиторий veremeioleg/kafkareader существует в Docker Hub"
-    echo "2. У вас есть права на публикацию в этот репозиторий"
-    echo "3. Вы авторизованы в Docker Hub (docker login)"
-    exit 1
-fi
-
-# Запуск приложения
-echo "Запуск приложения..."
-docker-compose up -d
-
-echo "Готово! Приложение запущено и доступно по адресу http://localhost:5252" 
+# Публикация образа в Docker Hub
+echo "Публикация образа для Linux/AMD64 в Docker Hub..."
+docker buildx build --platform linux/amd64 -t veremeioleg/kafkareader:latest --push . 

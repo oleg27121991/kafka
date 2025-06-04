@@ -2,9 +2,9 @@ spring:
   application:
     name: kafkareader
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://host.docker.internal:5433/kafkareader}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    url: jdbc:postgresql://localhost:5433/kafkareader
+    username: postgres
+    password: postgres
     hikari:
       connection-timeout: 20000
       minimum-idle: 10
@@ -31,7 +31,6 @@ spring:
       open-in-view: false
   servlet:
     multipart:
-      enabled: true
       max-file-size: 100MB
       max-request-size: 100MB
     context-path: /
@@ -49,6 +48,18 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        batch.size: 2097152  # 2MB
+        buffer.memory: 134217728  # 128MB
+        compression.type: lz4
+        max.request.size: 2097152  # 2MB
+        acks: 0  # Отключаем подтверждения для максимальной скорости
+        retries: 0  # Отключаем повторные попытки
+        linger.ms: 1  # Минимальная задержка
+        max.in.flight.requests.per.connection: 10
+        enable.idempotence: false
+        max.block.ms: 1000
+        request.timeout.ms: 1000
     consumer:
       group-id: ${spring.application.name}
       auto-offset-reset: earliest
@@ -56,17 +67,18 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     properties:
       security:
-        protocol: ${KAFKA_SECURITY_PROTOCOL}
+        protocol: PLAINTEXT
 
 # Отладочный вывод
 logging:
   level:
-    org.springframework.kafka: DEBUG
+    org.springframework.kafka: OFF
     kafkareader: INFO
-    org.springframework.boot.context.config: TRACE
+    org.springframework.boot.context.config: OFF
     org.hibernate.SQL: OFF
     org.hibernate.type.descriptor.sql: OFF
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
 
 server:
-  port: 5252
+  port: 8080
+  address: 0.0.0.0

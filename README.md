@@ -13,35 +13,9 @@
 ### 1. Запуск Kafka через Docker Compose
 
 ```bash
-# Создайте файл docker-compose.yml со следующим содержимым:
-version: '3'
-services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
+# Выполните команду в корне проекта:
 
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_MESSAGE_MAX_BYTES: 10485760
-      KAFKA_REPLICA_FETCH_MAX_BYTES: 10485760
-      KAFKA_MAX_REQUEST_SIZE: 10485760
-
-# Запустите Kafka
-docker-compose up -d
+docker-compose -f docker-compose.kafka.yml up -d
 ```
 
 ## Запуск приложения
@@ -49,22 +23,16 @@ docker-compose up -d
 ### 1. Сборка проекта
 
 ```bash
-# Сборка через Gradle
-./gradlew clean build
+# Запустите базу данных выполнив команду в корне проекта:
 
-# Или через Maven
-mvn clean package
+docker-compose -f docker-compose.db.yml up -d
 ```
 
 ### 2. Запуск приложения
-
 ```bash
-# Запуск с настройками по умолчанию (Kafka на localhost:9092)
-java -jar build/libs/kafkareader-0.0.1-SNAPSHOT.jar
+# Запустите приложение выполнив команду в корне проекта:
 
-# Или с указанием конкретного Kafka кластера
-java -jar build/libs/kafkareader-0.0.1-SNAPSHOT.jar \
-  --spring.kafka.bootstrap-servers=kafka1:9092,kafka2:9092
+docker-compose -f docker-compose.app.yml up -d
 ```
 
 ## Использование

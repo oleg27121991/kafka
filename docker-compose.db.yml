@@ -18,6 +18,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - kafkareader-network
 
 volumes:
   postgres_data:
+
+networks:
+  kafkareader-network:
+    name: kafkareader-network
