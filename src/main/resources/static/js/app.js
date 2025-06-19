@@ -967,7 +967,7 @@ function initializeApp() {
     // Загрузка состояния непрерывной записи
     loadContinuousState();
     loadRegexGroups();
-    
+
     // Инициализация обработчиков событий
     document.addEventListener('click', function(e) {
         if (e.target.closest('.toggle-details') || e.target.closest('.history-item-header')) {
