@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Service
@@ -63,11 +64,14 @@ public class ContinuousLogWriter {
     private static final Pattern WRAPPED_BY_PATTERN = Pattern.compile("^Wrapped by:.*");
 
     private static final int BATCH_SIZE = 5000; // Уменьшаем размер батча для лучшего контроля скорости
-    private static final int MAX_RETRIES = 5;
-    private static final long RETRY_BACKOFF_MS = 100;
     private static final int THREAD_POOL_SIZE = 8; // Параллельная отправка
     
     private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
+    private List<String> filesToProcess = new ArrayList<>();
+    private AtomicInteger currentFileIndex = new AtomicInteger(0);
+    private Pattern userPartitionPattern = null;
+    private String userPartitionPatternString = null;
 
     @Autowired(required = false)
     public void setKafkaTemplate(KafkaTemplate<String, String> kafkaTemplate) {
@@ -112,8 +116,51 @@ public class ContinuousLogWriter {
         }
     }
 
+    public void processFiles(List<MultipartFile> files, int targetSpeed, double targetDataSpeed, String partitionRegex) {
+        log.info("Запуск обработки {} файлов с паттерном партиционирования: {}", files.size(), partitionRegex);
+        ensureKafkaTemplate();
+        if (!isKafkaConfigured()) {
+            log.error("Kafka не настроен. Пожалуйста, настройте подключение к Kafka через веб-интерфейс.");
+            return;
+        }
+        this.targetSpeed = targetSpeed;
+        this.targetDataSpeed = targetDataSpeed;
+        this.filesToProcess.clear();
+        for (MultipartFile file : files) {
+            this.filesToProcess.add(file.getOriginalFilename());
+        }
+        this.currentFileIndex.set(0);
+        setUserPartitionPattern(partitionRegex);
+        isRunning.set(true);
+        isStopping.set(false);
+        startTime.set(System.currentTimeMillis());
+        processNextFile(files, targetSpeed, targetDataSpeed);
+    }
+
+    private void processNextFile(List<MultipartFile> files, int targetSpeed, double targetDataSpeed) {
+        if (!isRunning.get() || files.isEmpty()) return;
+        int index = currentFileIndex.getAndUpdate(i -> (i + 1) % files.size());
+        MultipartFile file = files.get(index);
+        log.info("Начинаем обработку файла {} ({} из {})", file.getOriginalFilename(), index + 1, files.size());
+        processFile(file, targetSpeed, targetDataSpeed);
+        if (isRunning.get() && !isStopping.get()) {
+            processNextFile(files, targetSpeed, targetDataSpeed); // по кругу
+        }
+    }
+
+    public void setUserPartitionPattern(String regex) {
+        if (regex != null && !regex.isEmpty()) {
+            this.userPartitionPatternString = regex;
+            this.userPartitionPattern = Pattern.compile(regex);
+            log.info("Установлен пользовательский паттерн для партиционирования: {}", regex);
+        } else {
+            this.userPartitionPattern = null;
+            this.userPartitionPatternString = null;
+        }
+    }
+
     public void processFile(@Nonnull MultipartFile file, int targetSpeed, double targetDataSpeed) {
-        log.info("Начало обработки файла: {}", file.getOriginalFilename());
+        log.info("[ContinuousLogWriter] Старт обработки файла: {} (targetSpeed={}, targetDataSpeed={})", file.getOriginalFilename(), targetSpeed, targetDataSpeed);
         
         ensureKafkaTemplate();
         
@@ -157,14 +204,15 @@ public class ContinuousLogWriter {
                 }
             }
             fileReadTimeMs = System.currentTimeMillis() - readStartTime;
-            log.info("Файл прочитан за {} мс, найдено {} валидных строк", fileReadTimeMs, validLines.size());
+            log.info("[ContinuousLogWriter] Файл {} прочитан за {} мс, найдено {} валидных строк (всего строк: {})", fileName, fileReadTimeMs, validLines.size(), totalLinesProcessed);
 
             if (!isRunning.get()) {
-                log.info("Обработка файла прервана");
+                log.info("[ContinuousLogWriter] Обработка файла прервана");
                 return;
             }
 
             // Основной цикл отправки
+            log.info("[ContinuousLogWriter] Начинается отправка данных в Kafka...");
             while (isRunning.get() && !isStopping.get()) {
                 long writeStartTime = System.currentTimeMillis();
                 sendDataToKafka();
@@ -177,11 +225,11 @@ public class ContinuousLogWriter {
                 }
             }
 
-            log.info("Обработка файла завершена. Итоговая статистика:");
+            log.info("[ContinuousLogWriter] Обработка файла завершена. Итоговая статистика:");
             logStatistics();
 
         } catch (Exception e) {
-            log.error("Ошибка при обработке файла: {}", e.getMessage(), e);
+            log.error("[ContinuousLogWriter] Ошибка при обработке файла: {}", e.getMessage(), e);
         } finally {
             isRunning.set(false);
             isStopping.set(false);
@@ -379,6 +427,9 @@ public class ContinuousLogWriter {
     }
 
     private boolean isValidLogLine(String line) {
+        if (userPartitionPattern != null) {
+            return userPartitionPattern.matcher(line).find();
+        }
         return TIME_PATTERN_1.matcher(line).find() || 
                TIME_PATTERN_2.matcher(line).find() ||
                STACK_TRACE_PATTERN.matcher(line).find() ||

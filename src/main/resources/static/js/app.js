@@ -1094,4 +1094,61 @@ function togglePassword() {
     DOM.elements.kafkaPassword.type = type;
     DOM.elements.togglePasswordButton.classList.toggle('fa-eye');
     DOM.elements.togglePasswordButton.classList.toggle('fa-eye-slash');
+}
+
+// Мульти-файловый режим
+let selectedMultiFiles = [];
+
+const multiFileInput = document.getElementById('multiFileInput');
+const multiSelectedFileNames = document.getElementById('multiSelectedFileNames');
+
+multiFileInput.addEventListener('change', function(e) {
+    selectedMultiFiles = Array.from(e.target.files);
+    if (selectedMultiFiles.length > 0) {
+        multiSelectedFileNames.textContent = selectedMultiFiles.map(f => f.name).join(', ');
+        document.getElementById('startMultiContinuousBtn').disabled = false;
+    } else {
+        multiSelectedFileNames.textContent = '';
+        document.getElementById('startMultiContinuousBtn').disabled = true;
+    }
+});
+
+document.getElementById('startMultiContinuousBtn').disabled = true;
+
+async function startMultiContinuousWriting() {
+    if (!selectedMultiFiles.length) {
+        showMessage('Пожалуйста, выберите файлы для мульти-записи');
+        return;
+    }
+    const partitionRegex = document.getElementById('partitionRegex').value;
+    const formData = new FormData();
+    selectedMultiFiles.forEach(file => formData.append('files', file));
+    const speedType = document.querySelector('input[name="speedType"]:checked').value;
+    if (speedType === 'messages') {
+        formData.append('targetSpeed', DOM.elements.targetSpeed.value);
+        formData.append('targetDataSpeed', '0');
+    } else {
+        formData.append('targetSpeed', '0');
+        formData.append('targetDataSpeed', DOM.elements.targetDataSpeed.value);
+    }
+    if (partitionRegex) {
+        formData.append('partitionRegex', partitionRegex);
+    }
+    try {
+        utils.disableButtons(['startMultiContinuousBtn', 'startContinuousBtn', 'stopContinuousBtn']);
+        showContinuousModal();
+        const response = await fetch(utils.getApiUrl('/api/writer/start-multi'), {
+            method: 'POST',
+            body: formData
+        });
+        if (!response.ok) {
+            throw new Error('Ошибка при запуске мульти-записи');
+        }
+        await updateContinuousStatus();
+    } catch (error) {
+        showMessage('Ошибка при запуске мульти-записи: ' + error.message, 'error');
+        hideContinuousModal();
+    } finally {
+        utils.enableButtons(['startMultiContinuousBtn', 'startContinuousBtn', 'stopContinuousBtn']);
+    }
 } 

@@ -80,4 +80,4 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: OFF
 
 server:
-  port: 8080
+  port: 8081

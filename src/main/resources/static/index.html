@@ -86,6 +86,18 @@
                     <label for="continuousFileInput" class="file-input-label">Выбрать файл</label>
                     <input type="file" id="continuousFileInput" accept=".log,.txt">
                     <div id="continuousSelectedFileName"></div>
+
+                    <!-- Новый input для мульти-файлов -->
+                    <label for="multiFileInput" class="file-input-label">Выбрать несколько файлов</label>
+                    <input type="file" id="multiFileInput" accept=".log,.txt" multiple>
+                    <div id="multiSelectedFileNames"></div>
+
+                    <!-- Поле для регулярного выражения -->
+                    <div class="form-group">
+                        <label for="partitionRegex">Регулярное выражение для партиционирования:</label>
+                        <input type="text" id="partitionRegex" placeholder="Например: ^\\d{4}-\\d{2}-\\d{2}">
+                    </div>
+
                     <div class="speed-controls">
                         <div class="speed-control">
                             <label class="speed-label">
@@ -103,6 +115,7 @@
                         </div>
                     </div>
                     <button id="startContinuousBtn" onclick="startContinuousWriting()" disabled>Начать запись</button>
+                    <button id="startMultiContinuousBtn" onclick="startMultiContinuousWriting()">Начать мульти-запись</button>
                     <button id="stopContinuousBtn" onclick="stopContinuousWriting()" style="display: none;">Остановить запись</button>
                     <button id="clearContinuousFileBtn" onclick="clearContinuousFile()" style="display: none;">Очистить выбор</button>
                 </div>
