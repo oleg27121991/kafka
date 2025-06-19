@@ -18,13 +18,14 @@ public class ContinuousWriterController {
     public ResponseEntity<?> startWriting(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "targetSpeed", defaultValue = "1000") int targetSpeed,
-            @RequestParam(value = "targetDataSpeed", defaultValue = "1.0") double targetDataSpeed) {
-        
+            @RequestParam(value = "targetDataSpeed", defaultValue = "1.0") double targetDataSpeed,
+            @RequestParam(value = "regexGroupName", required = false) String regexGroupName) {
+
         if (!continuousLogWriter.isKafkaConfigured()) {
             return ResponseEntity.badRequest().body("Kafka не настроен. Пожалуйста, настройте подключение к Kafka через веб-интерфейс.");
         }
 
-        continuousLogWriter.processFile(file, targetSpeed, targetDataSpeed);
+        continuousLogWriter.processFile(file, targetSpeed, targetDataSpeed, regexGroupName);
         return ResponseEntity.ok().build();
     }
 

@@ -72,12 +72,12 @@ spring:
 # Отладочный вывод
 logging:
   level:
-    org.springframework.kafka: OFF
+    org.springframework.kafka: INFO
     kafkareader: INFO
-    org.springframework.boot.context.config: OFF
-    org.hibernate.SQL: OFF
-    org.hibernate.type.descriptor.sql: OFF
-    org.hibernate.type.descriptor.sql.BasicBinder: OFF
+    org.springframework.boot.context.config: INFO
+    org.hibernate.SQL: INFO
+    org.hibernate.type.descriptor.sql: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: INFO
 
 server:
   port: 8080

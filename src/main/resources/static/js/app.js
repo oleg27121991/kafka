@@ -163,7 +163,7 @@ async function startContinuousWriting() {
 
     const formData = new FormData();
     formData.append('file', selectedContinuousFile);
-    
+
     const speedType = document.querySelector('input[name="speedType"]:checked').value;
     if (speedType === 'messages') {
         formData.append('targetSpeed', DOM.elements.targetSpeed.value);
@@ -172,6 +172,9 @@ async function startContinuousWriting() {
         formData.append('targetSpeed', '0');
         formData.append('targetDataSpeed', DOM.elements.targetDataSpeed.value);
     }
+
+    const regexGroup = document.getElementById('regexGroupSelect').value;
+    formData.append('regexGroupName', regexGroup);
 
     try {
         const response = await fetch(utils.getApiUrl('/api/writer/start'), {
@@ -963,6 +966,7 @@ function initializeApp() {
     
     // Загрузка состояния непрерывной записи
     loadContinuousState();
+    loadRegexGroups();
     
     // Инициализация обработчиков событий
     document.addEventListener('click', function(e) {
@@ -1094,4 +1098,182 @@ function togglePassword() {
     DOM.elements.kafkaPassword.type = type;
     DOM.elements.togglePasswordButton.classList.toggle('fa-eye');
     DOM.elements.togglePasswordButton.classList.toggle('fa-eye-slash');
-} 
+}
+
+function loadRegexGroups() {
+    fetch('/api/regex-groups')
+        .then(response => response.json())
+        .then(groups => {
+            const container = document.getElementById('regexGroupsContainer');
+            const select = document.getElementById('regexGroupSelect');
+            container.innerHTML = '';
+            select.innerHTML = '<option value="">По умолчанию</option>';
+
+            groups.forEach(group => {
+                // Создаем элемент группы
+                const groupEl = document.createElement('div');
+                groupEl.className = 'regex-group';
+
+                // HTML для паттернов
+                let patternsHTML = '';
+                if (group.patterns && group.patterns.length > 0) {
+                    patternsHTML = `
+            <ul class="pattern-list">
+              ${group.patterns.map(p =>
+                        `<li><strong>${p.name}:</strong> ${p.pattern}</li>`
+                    ).join('')}
+            </ul>
+          `;
+                }
+
+                // Шаблон группы с паттернами
+                groupEl.innerHTML = `
+          <div class="metric-card">
+            <h2>${group.name}</h2>
+            ${patternsHTML}
+            <div>
+              <button class="file-input-label" onclick="openEditModal(${group.id}, '${group.name}')">Редактировать</button>
+              <button id="deleteRegexGroup" onclick="deleteRegexGroup(${group.id})">Удалить</button>
+            </div>
+          </div>
+        `;
+                container.appendChild(groupEl);
+
+                // Добавляем группу в выпадающий список
+                const option = document.createElement('option');
+                option.value = group.name;
+                option.textContent = group.name;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Ошибка при загрузке групп:', error);
+            showMessage('Не удалось загрузить группы', 'error');
+        });
+}
+
+async function createRegexGroup() {
+    const nameInput = document.getElementById('newGroupName');
+    const name = nameInput.value.trim();
+    if (!name) {
+        showMessage('Введите имя группы', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/regex-groups', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name })
+        });
+        if (response.ok) {
+            showMessage('Группа создана успешно', 'success');
+            nameInput.value = '';
+            loadRegexGroups();
+        } else {
+            const error = await response.text();
+            showMessage(`Ошибка: ${error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка при создании группы:', error);
+        showMessage('Ошибка при создании группы', 'error');
+    }
+}
+
+async function deleteRegexGroup(id) {
+    if (!confirm('Вы уверены, что хотите удалить эту группу?')) return;
+
+    try {
+        const response = await fetch(`/api/regex-groups/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            showMessage('Группа удалена', 'success');
+            loadRegexGroups();
+        } else {
+            const error = await response.text();
+            showMessage(`Ошибка: ${error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка при удалении группы:', error);
+        showMessage('Ошибка при удалении группы', 'error');
+    }
+}
+
+async function openEditModal(groupId, groupName) {
+    document.getElementById('editModalGroupId').value = groupId;
+    document.getElementById('editModalGroupName').textContent = groupName;
+
+    try {
+        const response = await fetch(`/api/regex-groups/${groupId}/patterns`);
+        const patterns = await response.json();
+        const patternsContainer = document.getElementById('patternsContainer');
+        patternsContainer.innerHTML = '';
+
+        // Добавляем паттерны
+        patterns.forEach(p => {
+            const patternEl = document.createElement('div');
+            patternEl.className = 'regex-pattern';
+            patternEl.innerHTML = `
+                <span><strong>${p.name}:</strong> ${p.pattern}</span>
+                <div class="pattern-actions">
+                    <button class="stop-btn" onclick="deletePattern(${groupId}, ${p.id})">Удалить</button>
+                </div>
+            `;
+            patternsContainer.appendChild(patternEl);
+        });
+    } catch (error) {
+        console.error('Ошибка при загрузке паттернов:', error);
+    }
+
+    document.getElementById('editRegexModal').style.display = 'block';
+}
+
+function closeEditModal() {
+    document.getElementById('editRegexModal').style.display = 'none';
+}
+
+async function addPattern() {
+    const groupId = document.getElementById('editModalGroupId').value;
+    const nameInput = document.getElementById('newPatternName');
+    const patternInput = document.getElementById('newPatternValue');
+    const name = nameInput.value.trim();
+    const pattern = patternInput.value.trim();
+
+    if (!name || !pattern) {
+        showMessage('Заполните имя и регулярное выражение', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/regex-groups/${groupId}/patterns`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, pattern })
+        });
+        if (response.ok) {
+            nameInput.value = '';
+            patternInput.value = '';
+            openEditModal(groupId, document.getElementById('editModalGroupName').textContent); // Refresh
+        } else {
+            const error = await response.text();
+            showMessage(`Ошибка: ${error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка при добавлении паттерна:', error);
+        showMessage('Ошибка при добавлении паттерна', 'error');
+    }
+}
+
+async function deletePattern(groupId, patternId) {
+    try {
+        const response = await fetch(`/api/regex-groups/${groupId}/patterns/${patternId}`, { method: 'DELETE' });
+        if (response.ok) {
+            openEditModal(groupId, document.getElementById('editModalGroupName').textContent); // Refresh
+        } else {
+            const error = await response.text();
+            showMessage(`Ошибка: ${error}`, 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка при удалении паттерна:', error);
+        showMessage('Ошибка при удалении паттерна', 'error');
+    }
+}

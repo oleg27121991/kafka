@@ -28,6 +28,10 @@
                 <i class="fas fa-chart-line"></i>
                 <span>Метрики</span>
             </a>
+            <a href="#regex" class="menu-item" data-tab="regex">
+                <i class="fas fa-tasks"></i>
+                <span>Регулярные выражения</span>
+            </a>
         </div>
         <!-- Кнопка сворачивания меню -->
         <button class="sidebar-toggle" title="Свернуть/развернуть меню">
@@ -92,7 +96,9 @@
                                 <input type="radio" name="speedType" value="messages" checked id="speedTypeMessages">
                                 <span>Целевая скорость (сообщений/сек):</span>
                             </label>
-                            <input type="number" id="targetSpeed" min="1" value="1000">
+                            <label class="speed-label">
+                                <input type="number" id="targetSpeed" min="1" value="1000">
+                            </label>
                         </div>
                         <div class="speed-control">
                             <label class="speed-label">
@@ -101,6 +107,10 @@
                             </label>
                             <input type="number" id="targetDataSpeed" min="1" step="0.1" value="1" disabled>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="regexGroupSelect">Группа регулярных выражений:</label>
+                        <select id="regexGroupSelect"></select>
                     </div>
                     <button id="startContinuousBtn" onclick="startContinuousWriting()" disabled>Начать запись</button>
                     <button id="stopContinuousBtn" onclick="stopContinuousWriting()" style="display: none;">Остановить запись</button>
@@ -190,34 +200,6 @@
                 </template>
 
                 <style>
-                    .history-item {
-                        background: #fff;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        margin-bottom: 12px;
-                        overflow: hidden;
-                    }
-
-                    .history-item-header {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        padding: 12px 16px;
-                        background: #f8f9fa;
-                        cursor: pointer;
-                        transition: background-color 0.2s;
-                    }
-
-                    .history-item-header:hover {
-                        background: #e9ecef;
-                    }
-
-                    .history-item-main {
-                        display: flex;
-                        gap: 16px;
-                        align-items: center;
-                    }
-
                     .history-item-time {
                         font-weight: 500;
                         color: #495057;
@@ -227,19 +209,6 @@
                     .history-item-server {
                         color: #6c757d;
                         font-size: 0.9em;
-                    }
-
-                    .toggle-details {
-                        background: none;
-                        border: none;
-                        color: #6c757d;
-                        cursor: pointer;
-                        padding: 4px;
-                        transition: transform 0.2s;
-                    }
-
-                    .toggle-details:hover {
-                        color: #495057;
                     }
 
                     .history-item-content {
@@ -259,22 +228,26 @@
                         gap: 4px;
                     }
 
-                    .metric-label {
-                        color: #6c757d;
-                        font-size: 0.9em;
-                    }
-
-                    .metric-value {
-                        font-size: 1.2em;
-                        font-weight: 500;
-                        color: #212529;
-                    }
-
                     .metric-unit {
                         color: #6c757d;
                         font-size: 0.9em;
                     }
                 </style>
+            </div>
+        </section>
+
+        <!-- Вкладка управления регулярными выражениями -->
+        <section id="regex" class="tab-content">
+            <div class="section">
+                <h2>Управление группами регулярных выражений</h2>
+                <div class="regex-management">
+                    <div class="form-group">
+                        <label for="newGroupName">Имя новой группы:</label>
+                        <input type="text" id="newGroupName" placeholder="Например, 'My-App-Logs'">
+                        <button id="createRegexGroup" onclick="createRegexGroup()">Создать группу</button>
+                    </div>
+                    <div id="regexGroupsContainer"></div>
+                </div>
             </div>
         </section>
     </main>
@@ -286,6 +259,23 @@
             <p id="modalMessage"></p>
             <div class="modal-buttons">
                 <button onclick="hideMessageModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="editRegexModal" class="modal">
+        <div class="modal-content">
+            <!-- Кнопка закрытия -->
+            <span class="close-pattern-btn" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </span>
+            <h3>Редактировать группу <span id="editModalGroupName"></span></h3>
+            <input type="hidden" id="editModalGroupId">
+            <div id="patternsContainer"></div>
+            <div class="form-group">
+                <input type="text" id="newPatternName" placeholder="Имя (например, TIME)">
+                <input type="text" id="newPatternValue" placeholder="Регулярное выражение">
+                <button class="minimize-btn" onclick="addPattern()">Добавить</button>
             </div>
         </div>
     </div>

@@ -35,6 +35,7 @@ import java.util.UUID;
 @Service
 @Lazy
 public class ContinuousLogWriter {
+    private final RegexGroupService regexGroupService;
     private volatile KafkaTemplate<String, String> kafkaTemplate;
     private String currentTopicName;
     private Map<String, Object> kafkaConfig = new HashMap<>();
@@ -53,14 +54,9 @@ public class ContinuousLogWriter {
     private long fileSizeBytes = 0;
     private int targetSpeed = 1000;
     private double targetDataSpeed = 1.0;
-    private List<String> validLines = new ArrayList<>();
-    
-    // Паттерны для определения временных меток
-    private static final Pattern TIME_PATTERN_1 = Pattern.compile("^(\\d{2}:\\d{2}:\\d{2},\\d{3})");
-    private static final Pattern TIME_PATTERN_2 = Pattern.compile("^(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3})");
-    private static final Pattern STACK_TRACE_PATTERN = Pattern.compile("^\\s+at\\s+.*");
-    private static final Pattern CAUSED_BY_PATTERN = Pattern.compile("^Caused by:.*");
-    private static final Pattern WRAPPED_BY_PATTERN = Pattern.compile("^Wrapped by:.*");
+    private List<String> allLines = new ArrayList<>();
+
+    private List<Pattern> timePatterns = new ArrayList<>();
 
     private static final int BATCH_SIZE = 5000; // Уменьшаем размер батча для лучшего контроля скорости
     private static final int MAX_RETRIES = 5;
@@ -68,6 +64,11 @@ public class ContinuousLogWriter {
     private static final int THREAD_POOL_SIZE = 8; // Параллельная отправка
     
     private final ExecutorService executorService = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+
+    @Autowired
+    public ContinuousLogWriter(RegexGroupService regexGroupService) {
+        this.regexGroupService = regexGroupService;
+    }
 
     @Autowired(required = false)
     public void setKafkaTemplate(KafkaTemplate<String, String> kafkaTemplate) {
@@ -112,11 +113,13 @@ public class ContinuousLogWriter {
         }
     }
 
-    public void processFile(@Nonnull MultipartFile file, int targetSpeed, double targetDataSpeed) {
-        log.info("Начало обработки файла: {}", file.getOriginalFilename());
-        
+    public void processFile(@Nonnull MultipartFile file, int targetSpeed, double targetDataSpeed, String regexGroupName) {
+        log.info("Начало обработки файла: {}, группа regex: {}", file.getOriginalFilename(), regexGroupName);
+
+        loadRegexPatterns(regexGroupName);
+
         ensureKafkaTemplate();
-        
+
         if (!isKafkaConfigured()) {
             log.error("Kafka не настроен. Пожалуйста, настройте подключение к Kafka через веб-интерфейс.");
             return;
@@ -141,23 +144,21 @@ public class ContinuousLogWriter {
             bytesSent.set(0);
             totalLinesProcessed = 0;
             linesWrittenToKafka = 0;
-            validLines.clear();
+            allLines.clear();
             totalProcessingTimeMs = 0;
-            
+
             // Читаем файл в память
             long readStartTime = System.currentTimeMillis();
             try (BufferedReader reader = new BufferedReader(
                     new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = reader.readLine()) != null && isRunning.get()) {
-                    if (isValidLogLine(line)) {
-                        validLines.add(line);
-                        totalLinesProcessed++;
-                    }
+                    allLines.add(line);
+                    totalLinesProcessed++;
                 }
             }
             fileReadTimeMs = System.currentTimeMillis() - readStartTime;
-            log.info("Файл прочитан за {} мс, найдено {} валидных строк", fileReadTimeMs, validLines.size());
+            log.info("Файл прочитан за {} мс, найдено {} строк", fileReadTimeMs, allLines.size());
 
             if (!isRunning.get()) {
                 log.info("Обработка файла прервана");
@@ -170,7 +171,7 @@ public class ContinuousLogWriter {
                 sendDataToKafka();
                 kafkaWriteTimeMs = System.currentTimeMillis() - writeStartTime;
                 totalProcessingTimeMs = System.currentTimeMillis() - startTime.get();
-                
+
                 // Логирование статистики
                 if (messagesSent.get() % 100000 == 0) {
                     logStatistics();
@@ -193,36 +194,20 @@ public class ContinuousLogWriter {
         // Группируем строки по сообщениям
         List<String> messageGroups = new ArrayList<>();
         StringBuilder currentMessage = new StringBuilder();
-        boolean isCollectingStackTrace = false;
 
-        for (String line : validLines) {
-            if (TIME_PATTERN_1.matcher(line).find() || TIME_PATTERN_2.matcher(line).find()) {
-                // Если это новая временная метка и у нас есть предыдущее сообщение
-                if (currentMessage.length() > 0) {
-                    messageGroups.add(currentMessage.toString());
-                    currentMessage = new StringBuilder();
-                }
-                currentMessage.append(line).append("\n");
-                isCollectingStackTrace = false;
-            } else if (STACK_TRACE_PATTERN.matcher(line).find() || 
-                      CAUSED_BY_PATTERN.matcher(line).find() || 
-                      WRAPPED_BY_PATTERN.matcher(line).find()) {
-                // Добавляем стектрейс к текущему сообщению
-                currentMessage.append(line).append("\n");
-                isCollectingStackTrace = true;
-            } else if (isCollectingStackTrace && line.trim().isEmpty()) {
-                // Пустая строка в стектрейсе
-                currentMessage.append(line).append("\n");
-            } else if (!isCollectingStackTrace && line.trim().isEmpty()) {
-                // Пустая строка между сообщениями
-                if (currentMessage.length() > 0) {
-                    messageGroups.add(currentMessage.toString());
-                    currentMessage = new StringBuilder();
-                }
-            } else if (isCollectingStackTrace) {
-                // Продолжаем собирать стектрейс
-                currentMessage.append(line).append("\n");
+        if (allLines.isEmpty()) {
+            isStopping.set(true);
+            return;
+        }
+
+        for (String line : allLines) {
+            boolean isNewMessageStart = !timePatterns.isEmpty() && timePatterns.stream().anyMatch(p -> p.matcher(line).find());
+
+            if (isNewMessageStart && currentMessage.length() > 0) {
+                messageGroups.add(currentMessage.toString());
+                currentMessage = new StringBuilder();
             }
+            currentMessage.append(line).append("\n");
         }
 
         // Добавляем последнее сообщение
@@ -378,13 +363,6 @@ public class ContinuousLogWriter {
         }
     }
 
-    private boolean isValidLogLine(String line) {
-        return TIME_PATTERN_1.matcher(line).find() || 
-               TIME_PATTERN_2.matcher(line).find() ||
-               STACK_TRACE_PATTERN.matcher(line).find() ||
-               CAUSED_BY_PATTERN.matcher(line).find() ||
-               WRAPPED_BY_PATTERN.matcher(line).find();
-    }
 
     private void processFile(Path filePath) {
         try {
@@ -400,36 +378,15 @@ public class ContinuousLogWriter {
             // Группируем строки по сообщениям
             List<String> messageGroups = new ArrayList<>();
             StringBuilder currentMessage = new StringBuilder();
-            boolean isCollectingStackTrace = false;
 
             for (String line : lines) {
-                if (TIME_PATTERN_1.matcher(line).find() || TIME_PATTERN_2.matcher(line).find()) {
-                    // Если это новая временная метка и у нас есть предыдущее сообщение
-                    if (currentMessage.length() > 0) {
-                        messageGroups.add(currentMessage.toString());
-                        currentMessage = new StringBuilder();
-                    }
-                    currentMessage.append(line).append("\n");
-                    isCollectingStackTrace = false;
-                } else if (STACK_TRACE_PATTERN.matcher(line).find() || 
-                          CAUSED_BY_PATTERN.matcher(line).find() || 
-                          WRAPPED_BY_PATTERN.matcher(line).find()) {
-                    // Добавляем стектрейс к текущему сообщению
-                    currentMessage.append(line).append("\n");
-                    isCollectingStackTrace = true;
-                } else if (isCollectingStackTrace && line.trim().isEmpty()) {
-                    // Пустая строка в стектрейсе
-                    currentMessage.append(line).append("\n");
-                } else if (!isCollectingStackTrace && line.trim().isEmpty()) {
-                    // Пустая строка между сообщениями
-                    if (currentMessage.length() > 0) {
-                        messageGroups.add(currentMessage.toString());
-                        currentMessage = new StringBuilder();
-                    }
-                } else if (isCollectingStackTrace) {
-                    // Продолжаем собирать стектрейс
-                    currentMessage.append(line).append("\n");
+                boolean isNewMessageStart = !timePatterns.isEmpty() && timePatterns.stream().anyMatch(p -> p.matcher(line).find());
+
+                if (isNewMessageStart && currentMessage.length() > 0) {
+                    messageGroups.add(currentMessage.toString());
+                    currentMessage = new StringBuilder();
                 }
+                currentMessage.append(line).append("\n");
             }
 
             // Добавляем последнее сообщение
@@ -495,4 +452,26 @@ public class ContinuousLogWriter {
             log.error("Ошибка при обработке файла {}: {}", filePath, e.getMessage(), e);
         }
     }
-} 
+    private void loadRegexPatterns(String groupName) {
+        timePatterns.clear();
+
+        if (groupName != null && !groupName.isEmpty()) {
+            regexGroupService.getGroupByName(groupName).ifPresent(group -> {
+                log.info("Загрузка группы регулярных выражений: {}", groupName);
+                group.getPatterns().forEach(p -> {
+                    if ("TIME".equalsIgnoreCase(p.getName())) {
+                        timePatterns.add(Pattern.compile(p.getPattern()));
+                    }
+                });
+            });
+        }
+
+        if (timePatterns.isEmpty()) {
+            log.warn("Группа регулярных выражений не найдена или пуста. Используются паттерны по умолчанию.");
+            // Паттерны по умолчанию
+            timePatterns.add(Pattern.compile("^(\\d{2}:\\d{2}:\\d{2},\\d{3})"));
+            timePatterns.add(Pattern.compile("^(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\.\\d{3})"));
+            timePatterns.add(Pattern.compile("^[A-Z][a-z]{2}\\s+\\d{1,2}\\s+\\d{2}:\\d{2}:\\d{2}"));
+        }
+    }
+}

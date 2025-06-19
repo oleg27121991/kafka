@@ -586,6 +586,21 @@ button:disabled {
     background-color: #218838;
 }
 
+#createRegexGroup {
+    background-color: #28a745;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+#createRegexGroup:hover {
+    background-color: #218838;
+}
+
 #startContinuousBtn:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
@@ -603,6 +618,21 @@ button:disabled {
 }
 
 #clearContinuousFileBtn:hover {
+    background-color: #c82333;
+}
+
+#deleteRegexGroup {
+    background-color: #dc3545;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+#deleteRegexGroup:hover {
     background-color: #c82333;
 }
 
@@ -1543,4 +1573,98 @@ button:disabled {
 .btn-secondary:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+}
+
+/* Стили для секции регулярные выражения */
+.pattern-list {
+    list-style-type: none;
+    padding-left: 1rem;
+    margin-top: 0.5rem;
+}
+
+.pattern-list li {
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+}
+
+#patternsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.regex-pattern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+}
+
+.regex-pattern span {
+    flex: 1;
+    text-align: left;
+}
+
+.pattern-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+}
+
+.add-pattern-btn {
+    align-self: flex-end;
+    margin-bottom: 10px;
+}
+
+.close-pattern-btn {
+    position: absolute;
+    top: 6px;
+    right: 17px;
+    font-size: 2em;
+    color: rgb(6, 41, 94);
+    cursor: pointer;
+    z-index: 10;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* расстояние между полем и кнопкой */
+    margin-bottom: 20px;
+}
+
+#newGroupName {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#newPatternName {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#newPatternValue {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    background-color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
